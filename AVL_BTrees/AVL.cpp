@@ -1,91 +1,51 @@
 #include "pch.h"
 #include "AVL.h"
+#include <io.h>
+#include <string.h>
 
 
 AVL::AVL()
 {
+	rootNode = nullptr; 
 }
 
-
-//private methods  
-void AVL::_updateBFs(AVL_Node* in_node)
+void AVL::Insert(char in_key[])
 {
-	//update BFs using traverse idea 
+	AVL_Node *leaderNode, *laggerNode, *lastOutOfSpec; 
 
-	bool complete = false;
-	AVL_Node* correctionCenter = nullptr;
+	lastOutOfSpec = nullptr; 
+	leaderNode = rootNode;
+	laggerNode = nullptr; 
 
-	do
+	while (leaderNode != nullptr)
 	{
-		//start at inserted node and work up to root to calculate new BFs
-		in_node->BF = _calculateBalanceFactor(in_node);
-		numOfBFChanges++;
+		laggerNode = leaderNode;
+		if (leaderNode->BF != 0) lastOutOfSpec = leaderNode; //store last node whose BF != 0
 
-		if ((in_node->BF == 2) || (in_node->BF == -2))
+		if (strcmp(leaderNode->key, in_key) == 0)
 		{
-			//this is node where rotation needs to occur
-			if (!correctionCenter) correctionCenter = in_node;
+			leaderNode->counter++;
+			return;
 		}
-
-		if (in_node == rootNode) complete = true;
-		else in_node = in_node->parent;
-
-	} while (complete == false);
-
-	if (correctionCenter)
-	{
-		_rotationHandler(correctionCenter);
+		else if (strcmp(leaderNode->key, in_key) > 0)
+		{
+			leaderNode = leaderNode->leftChild;
+		}
+		else leaderNode = leaderNode->rightChild;
 	}
-}
+	//hit leaf position, lagger node is connection point
+	//create new node 
 
-int AVL::_calculateBalanceFactor(AVL_Node* tippingNode)
-{
-	int rightHeight, leftHeight;
-	if (tippingNode->rightChild != 0)
+	AVL_Node newNode;
+	newNode.counter = 1;
+	strcpy(newNode.key, in_key);
+
+	if (laggerNode == nullptr) rootNode = &newNode; 
+	else if (strcmp(laggerNode->key, in_key) > 0) laggerNode->leftChild = &newNode;  //new node is left child
+	else laggerNode->rightChild = &newNode; 
+
+	if (lastOutOfSpec != nullptr)
 	{
-		rightHeight = (_getNodeHeight(tippingNode->rightChild) + 1);
-	}
-	else rightHeight = 0;
 
-	if (tippingNode->leftChild != 0)
-	{
-		leftHeight = (_getNodeHeight(tippingNode->leftChild) + 1);
-	}
-	else leftHeight = 0;
-
-	_getNodeHeight(tippingNode);
-	return (leftHeight - rightHeight);
-}
-
-int AVL::_getNodeHeight(AVL_Node* focusNode)
-{
-	int ret1, ret2;
-	//calculate the height of the node 
-	if ((focusNode->rightChild == 0) && (focusNode->leftChild == 0))
-	{
-		return 0;
-	}
-	else
-	{
-		if (focusNode->rightChild != 0)
-		{
-			ret1 = _getNodeHeight(focusNode->rightChild);
-		}
-		else ret1 = 0;
-
-		if (focusNode->leftChild != 0)
-		{
-			ret2 = _getNodeHeight(focusNode->leftChild);
-		}
-		else ret2 = 0;
-
-		if (ret1 > ret2)
-		{
-			return (ret1 + 1);
-		}
-		else
-		{
-			return (ret2 + 1);
-		}
 	}
 }
