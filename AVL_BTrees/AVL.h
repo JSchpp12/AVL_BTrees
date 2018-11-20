@@ -19,6 +19,8 @@ public:
 	void Insert(char in_key[]); 
 
 private: 
-	AVL_Node* _readFile(); 
+	AVL_Node* _readFile();
+	void LL_Rotate(AVL_Node *rotationPoint, AVL_Node *parent); 
+	void RR_Rotate(); 
 };
 
