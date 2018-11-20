@@ -23,5 +23,6 @@ private:
 	void _updateBFs(AVL_Node* in_node);
 	int _calculateBalanceFactor(AVL_Node* focusNode);
 	int _getNodeHeight(AVL_Node* focusNode);
+	void _rotationHandler(AVL_Node* focusNode)
 };
 

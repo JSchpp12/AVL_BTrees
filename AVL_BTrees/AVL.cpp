@@ -19,7 +19,7 @@ void AVL::_updateBFs(AVL_Node* in_node)
 	{
 		//start at inserted node and work up to root to calculate new BFs
 		in_node->BF = _calculateBalanceFactor(in_node);
-		numOfBFChanges++;
+		//numOfBFChanges++;
 
 		if ((in_node->BF == 2) || (in_node->BF == -2))
 		{
@@ -86,6 +86,52 @@ int AVL::_getNodeHeight(AVL_Node* focusNode)
 		else
 		{
 			return (ret2 + 1);
+		}
+	}
+}
+
+void AVL::_rotationHandler(AVL_Node* correctionCenter)
+{
+	//correctionCenter will be the lowest node with a BF that is out of spec and requires rotation to correct 
+
+	//insertionSide: 
+	//1 - left 
+	//2 - right
+
+	int temp = nodeStorage_index - 1;
+	AVL_Node *insertedNode = &nodeStorage[temp];
+	AVL_Node *grandparentNode = nullptr;
+	AVL_Node *loopNode = nullptr;
+
+	char tempContainer[50];
+	int direction1 = 0;
+	int direction2 = 0;
+
+	if (correctionCenter->BF >= 2)
+	{
+		//left subtree too big 
+		if (correctionCenter->leftChild->BF > 0)
+		{
+			//inserted node was in the left subtree of the left node LL
+			LL_rotate(correctionCenter);
+		}
+		else
+		{
+			//LR 
+			LR_rotate(correctionCenter);
+		}
+	}
+	else
+	{
+		if (correctionCenter->rightChild->BF > 0)
+		{
+			//left subtree of right node RL 
+			RL_rotate(correctionCenter);
+		}
+		else
+		{
+			//RR rotate, should be 
+			RR_rotate(correctionCenter);
 		}
 	}
 }
