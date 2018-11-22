@@ -14,14 +14,14 @@ public:
 
 	int writeIndex = 0;
 	AVL_Node *rootNode; 
-
+	AVL_Node *returnedNode; //using this pointer to return a node to the insert methods from rotation methods 
 	AVL();
 	void Insert(char in_key[]); 
 	
 private: 
 	AVL_Node* _readFile();
-	AVL_Node* LL_Rotate(AVL_Node *rotationPoint, AVL_Node *parent); 
-	AVL_Node *RR_Rotate(AVL_Node *rotationPoint);
+	void LL_Rotate(AVL_Node *rotationPoint); 
+	void RR_Rotate(AVL_Node *rotationPoint);
 	int _calculateBalanceFactor(AVL_Node *tippingNode); 
 	int _getNodeHeight(AVL_Node *focusNode); 
 
