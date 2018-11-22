@@ -127,29 +127,6 @@ void AVL::Insert(char in_key[])
 					LL_Rotate(lastOutOfSpec); 
 					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
 					else parentOfLastOutSpec->leftChild = returnedNode;
-
-					//LL Rotation
-					//change child pointers of lastOutOfSpec and leftChild to reflect rotation
-
-					
-					//TO MEET STORAGE REQUIRENMENTS ONLY FOCUS ON THE NODES DIRECTLY INVOLVED IN THE ROTATIONM, THEN CLEAR THOSE FROM MEMORY, THEN LOAD IN PARENT TO ATTACKED ROTATED TREE TOO
-					/*
-					std::cout << "LL Rotate \n"; 
-					AVL_Node *storage = lastOutOfSpec->leftChild->rightChild;
-					AVL_Node *newRoot = lastOutOfSpec->leftChild; 
-
-					newRoot->rightChild = lastOutOfSpec; 
-					lastOutOfSpec->leftChild = storage; 
-
-					//update BFs 
-					newRoot->BF = _calculateBalanceFactor(newRoot);
-					newRoot->leftChild->BF = _calculateBalanceFactor(newRoot->leftChild);
-					newRoot->rightChild->BF = _calculateBalanceFactor(newRoot->rightChild);
-
-					//clear nodes out of memory here then attach to parent
-					if (lastOutOfSpec == rootNode) rootNode = newRoot; 
-					else parentOfLastOutSpec->leftChild = newRoot; 
-					*/ 
 				}
 				else
 				{
@@ -158,7 +135,7 @@ void AVL::Insert(char in_key[])
 
 					//determine which side of the tree the insertion occured on 
 					bool leftChild;
-					if (lastOutOfSpec == parentOfLastOutSpec->leftChild) leftChild = true;
+					if ((parentOfLastOutSpec) && (lastOutOfSpec == parentOfLastOutSpec->leftChild)) leftChild = true;
 					else false;
 
 					RR_Rotate(lastOutOfSpec->leftChild); 
@@ -169,40 +146,6 @@ void AVL::Insert(char in_key[])
 					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
 					else if (leftChild == true) parentOfLastOutSpec->leftChild = returnedNode;
 					else if (leftChild == false) parentOfLastOutSpec->rightChild = returnedNode;
-
-					//temporary fix --------- for the first rotation need to move down to child node 
-					/*
-					parentOfLastOutSpec = lastOutOfSpec; 
-					lastOutOfSpec = lastOutOfSpec->leftChild; 
-
-					std::cout << "RR Rotation\n";
-					AVL_Node *storage = lastOutOfSpec->rightChild->leftChild;
-					AVL_Node *newRoot = lastOutOfSpec->rightChild;
-
-					newRoot->leftChild = lastOutOfSpec;
-					lastOutOfSpec->rightChild = storage;
-
-					//clear nodes out of memory here then attach to parent
-					if (lastOutOfSpec == rootNode) rootNode = newRoot;
-					else parentOfLastOutSpec->rightChild = newRoot;
-
-					//LL rotate, need to clear memory and get new nodes from file ---- LATER
-					std::cout << "LL Rotation\n"; 
-					storage = lastOutOfSpec->leftChild->rightChild;
-					newRoot = lastOutOfSpec->leftChild;
-
-					newRoot->rightChild = lastOutOfSpec;
-					lastOutOfSpec->leftChild = storage;
-
-					//update BFs 
-					newRoot->BF = _calculateBalanceFactor(newRoot);
-					newRoot->leftChild->BF = _calculateBalanceFactor(newRoot->leftChild);
-					newRoot->rightChild->BF = _calculateBalanceFactor(newRoot->rightChild);
-
-					//clear nodes out of memory here then attach to parent
-					if (lastOutOfSpec == rootNode) rootNode = newRoot;
-					else parentOfLastOutSpec->leftChild = newRoot;
-					*/ 
 				}
 			}
 		else if (displacement == -1)
@@ -214,30 +157,12 @@ void AVL::Insert(char in_key[])
 
 					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
 					else parentOfLastOutSpec->rightChild = returnedNode;
-
-					/*
-					std::cout << "RR Rotation\n";
-					AVL_Node *storage = lastOutOfSpec->rightChild->leftChild; 
-					AVL_Node *newRoot = lastOutOfSpec->rightChild; 
-
-					newRoot->leftChild = lastOutOfSpec;
-					lastOutOfSpec->rightChild = storage;
-
-					//update BFs 
-					newRoot->BF = _calculateBalanceFactor(newRoot); 
-					newRoot->leftChild->BF = _calculateBalanceFactor(newRoot->leftChild); 
-					newRoot->rightChild->BF = _calculateBalanceFactor(newRoot->rightChild); 
-
-					//clear nodes out of memory here then attach to parent
-					if (lastOutOfSpec == rootNode) rootNode = newRoot;
-					else parentOfLastOutSpec->rightChild = newRoot;
-					*/ 
 				}
 				else
 				{
 					//determine which side of the tree the insertion occured on 
 					bool leftChild; 
-					if (lastOutOfSpec == parentOfLastOutSpec->leftChild) leftChild = true; 
+					if ((parentOfLastOutSpec) && (lastOutOfSpec == parentOfLastOutSpec->leftChild)) leftChild = true;
 					else false; 
 
 					std::cout << "RL rotation\n"; 
@@ -248,7 +173,6 @@ void AVL::Insert(char in_key[])
 					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
 					else if (leftChild == true) parentOfLastOutSpec->leftChild = returnedNode; 
 					else if (leftChild == false) parentOfLastOutSpec->rightChild = returnedNode; 
-					
 				}
 			}
 		}
@@ -272,7 +196,6 @@ void AVL::LL_Rotate(AVL_Node *rotationPoint)
 	if (newRoot->rightChild) newRoot->rightChild->BF = _calculateBalanceFactor(newRoot->rightChild);
 
 	//clear nodes out of memory here then attach to parent
-	
 	returnedNode = newRoot; 
 }
 
