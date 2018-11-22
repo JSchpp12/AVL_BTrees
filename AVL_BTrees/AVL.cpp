@@ -147,7 +147,37 @@ void AVL::Insert(char in_key[])
 				{
 					//LR Rotation -- RR Rotation and then a LL rotation
 					std::cout << "LR\n";
+					//temporary fix --------- for the first rotation need to move down to child node 
+					parentOfLastOutSpec = lastOutOfSpec; 
+					lastOutOfSpec = lastOutOfSpec->leftChild; 
 
+					std::cout << "RR Rotation\n";
+					AVL_Node *storage = lastOutOfSpec->rightChild->leftChild;
+					AVL_Node *newRoot = lastOutOfSpec->rightChild;
+
+					newRoot->leftChild = lastOutOfSpec;
+					lastOutOfSpec->rightChild = storage;
+
+					//clear nodes out of memory here then attach to parent
+					if (lastOutOfSpec == rootNode) rootNode = newRoot;
+					else parentOfLastOutSpec->rightChild = newRoot;
+
+					//LL rotate, need to clear memory and get new nodes from file ---- LATER
+					std::cout << "LL Rotation\n"; 
+					storage = lastOutOfSpec->leftChild->rightChild;
+					newRoot = lastOutOfSpec->leftChild;
+
+					newRoot->rightChild = lastOutOfSpec;
+					lastOutOfSpec->leftChild = storage;
+
+					//update BFs 
+					newRoot->BF = _calculateBalanceFactor(newRoot);
+					newRoot->leftChild->BF = _calculateBalanceFactor(newRoot->leftChild);
+					newRoot->rightChild->BF = _calculateBalanceFactor(newRoot->rightChild);
+
+					//clear nodes out of memory here then attach to parent
+					if (lastOutOfSpec == rootNode) rootNode = newRoot;
+					else parentOfLastOutSpec->leftChild = newRoot;
 				}
 			}
 		else if (displacement == -1)
@@ -176,18 +206,26 @@ void AVL::Insert(char in_key[])
 				}
 			}
 		}
-		
 	}
 }
 
-void AVL::LL_Rotate(AVL_Node *rotationPoint, AVL_Node *parent)
+struct AVL_Node
+{
+	int BF;
+	int fileIndex;   //where in the file this node is written
+	int counter;
+	AVL_Node *leftChild = nullptr;
+	AVL_Node *rightChild = nullptr;
+	char key[50];
+};
+
+AVL_Node* AVL::LL_Rotate(AVL_Node *rotationPoint, AVL_Node *parent)
 {
 
 }
 
 int AVL::_calculateBalanceFactor(AVL_Node* tippingNode)
 {
-
 	int rightHeight, leftHeight;
 	if (tippingNode->rightChild != nullptr)
 	{
