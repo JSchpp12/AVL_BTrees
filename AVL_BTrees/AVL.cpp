@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "AVL.h"
 #include <io.h>
+#include <iostream>
 #include <string.h>
 
 
@@ -16,7 +17,7 @@ void AVL::Insert(char in_key[])
 
 	lastOutOfSpec = rootNode;
 	leaderNode = rootNode;
-	laggerNode = nullptr;
+	parentOfLastOutSpec = laggerNode = nullptr;
 
 	//tree is empty 
 	if (rootNode == nullptr)
@@ -119,29 +120,57 @@ void AVL::Insert(char in_key[])
 				{
 					//LL Rotation
 					//change child pointers of lastOutOfSpec and leftChild to reflect rotation
-					LL_Rotate(parentOfLastOutSpec); 
+					//AVL_Node *movingSubTree = rotationPoint->leftChild->rightChild; 
+					//set new rootnode if rotation is occuring at root of tree
+
+					//TO MEET STORAGE REQUIRENMENTS ONLY FOCUS ON THE NODES DIRECTLY INVOLVED IN THE ROTATIONM, THEN CLEAR THOSE FROM MEMORY, THEN LOAD IN PARENT TO ATTACKED ROTATED TREE TOO
+					AVL_Node *storage = lastOutOfSpec->leftChild->rightChild;
+					AVL_Node *newRoot = lastOutOfSpec->leftChild; 
+
+					newRoot->rightChild = lastOutOfSpec; 
+					lastOutOfSpec->leftChild = storage; 
+
+					//clear nodes out of memory here then attach to parent
+					if (lastOutOfSpec == rootNode) rootNode = newRoot; 
+					else parentOfLastOutSpec->leftChild = newRoot; 
 				}
 				else
 				{
 					//LR Rotation
+					if (lastOutOfSpec->rightChild->BF == -1)
+					{
+						//RR Rotation
+						std::cout << "LR"; 
 
+					}
+				}
+			}
+			else if (displacement == -1)
+			{
+				if (lastOutOfSpec->rightChild->BF == -1)
+				{
+					std::cout << "RR Rotation";
+					AVL_Node *storage = lastOutOfSpec->rightChild->leftChild; 
+					AVL_Node *newRoot = lastOutOfSpec->rightChild; 
+
+					newRoot->leftChild = lastOutOfSpec;
+					lastOutOfSpec->rightChild = storage;
+
+					//clear nodes out of memory here then attach to parent
+					if (lastOutOfSpec == rootNode) rootNode = newRoot;
+					else parentOfLastOutSpec->rightChild = newRoot;
+				}
+				else
+				{
+					std::cout << "RL rotation"; 
 				}
 			}
 		}
+		
 	}
 }
 
 void AVL::LL_Rotate(AVL_Node *rotationPoint, AVL_Node *parent)
-{
-	//AVL_Node *movingSubTree = rotationPoint->leftChild->rightChild; 
-	//set new rootnode if rotation is occuring at root of tree
-	if (rotationPoint == rootNode) rootNode = rotationPoint->leftChild;
-	else if (parent->leftChild == rotationPoint) parent->leftChild = rotationPoint->leftChild; 
-	else parent->rightChild = rotationPoint->leftChild; 
-	
-}
-
-void AVL::RR_Rotate()
 {
 
 }

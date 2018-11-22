@@ -21,6 +21,6 @@ public:
 private: 
 	AVL_Node* _readFile();
 	void LL_Rotate(AVL_Node *rotationPoint, AVL_Node *parent); 
-	void RR_Rotate(); 
+	AVL_Node *RR_Rotate(AVL_Node *rotationPoint);
 };
 
