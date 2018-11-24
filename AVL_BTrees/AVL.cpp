@@ -7,13 +7,13 @@
 
 AVL::AVL()
 {
-	rootNode = nullptr; 
+	rootNode = nullptr;
 }
 
 void AVL::Insert(char in_key[])
 {
-	AVL_Node *leaderNode, *laggerNode, *lastOutOfSpec, *parentOfLastOutSpec; 
-	int displacement; 
+	AVL_Node *leaderNode, *laggerNode, *lastOutOfSpec, *parentOfLastOutSpec;
+	int displacement;
 
 	lastOutOfSpec = rootNode;
 	leaderNode = rootNode;
@@ -25,7 +25,7 @@ void AVL::Insert(char in_key[])
 		AVL_Node* newNode = new AVL_Node();
 		strcpy(newNode->key, in_key);
 		newNode->leftChild = nullptr;
-		newNode->rightChild = nullptr; 
+		newNode->rightChild = nullptr;
 		newNode->BF = 0;
 		newNode->counter = 1;
 		rootNode = newNode;
@@ -40,8 +40,8 @@ void AVL::Insert(char in_key[])
 				if (leaderNode->BF != 0)
 				{
 					//store last node whose BF != 0 and its parent 
-					lastOutOfSpec = leaderNode; 
-					parentOfLastOutSpec = laggerNode; 
+					lastOutOfSpec = leaderNode;
+					parentOfLastOutSpec = laggerNode;
 				}
 
 				//move laggerNode up to leaderNode
@@ -55,12 +55,12 @@ void AVL::Insert(char in_key[])
 				else if (strcmp(leaderNode->key, in_key) > 0)
 				{
 					if (leaderNode->leftChild != nullptr) leaderNode = leaderNode->leftChild;
-					else leaderNode = nullptr; 
+					else leaderNode = nullptr;
 				}
 				else if (leaderNode->rightChild != nullptr)leaderNode = leaderNode->rightChild;
-				else leaderNode = nullptr; 
+				else leaderNode = nullptr;
 			}
-			else break; 
+			else break;
 		} while (leaderNode != nullptr);
 		//hit leaf position, lagger node is connection point
 
@@ -81,26 +81,26 @@ void AVL::Insert(char in_key[])
 		{
 			if (strcmp(in_key, lastOutOfSpec->key) > 0)
 			{
-				displacement = -1; 
-				correctionTracker = lastOutOfSpec->rightChild; 
+				displacement = -1;
+				correctionTracker = lastOutOfSpec->rightChild;
 			}
 			else
 			{
-				displacement = 1; 
-				correctionTracker = lastOutOfSpec->leftChild; 
+				displacement = 1;
+				correctionTracker = lastOutOfSpec->leftChild;
 			}
 
 			while (correctionTracker != newNode)
 			{
 				if (strcmp(in_key, correctionTracker->key) > 0)
 				{
-					correctionTracker->BF = -1; 
-					correctionTracker = correctionTracker->rightChild; 
+					correctionTracker->BF = -1;
+					correctionTracker = correctionTracker->rightChild;
 				}
 				else
 				{
-					correctionTracker->BF = 1; 
-					correctionTracker = correctionTracker->leftChild; 
+					correctionTracker->BF = 1;
+					correctionTracker = correctionTracker->leftChild;
 				}
 			}
 
@@ -108,14 +108,14 @@ void AVL::Insert(char in_key[])
 			if (lastOutOfSpec->BF == 0)
 			{
 				//only slightly out of balance but acceptable
-				lastOutOfSpec->BF = displacement; 
-				return; 
+				lastOutOfSpec->BF = displacement;
+				return;
 			}
 			if (lastOutOfSpec->BF == -displacement)
 			{
 				//insert returned tree to balance
-				lastOutOfSpec->BF = 0; 
-				return; 
+				lastOutOfSpec->BF = 0;
+				return;
 			}
 
 			//if neither of the two returns above are hit, the tree is not balanced 
@@ -124,7 +124,7 @@ void AVL::Insert(char in_key[])
 				if (lastOutOfSpec->leftChild->BF == 1)
 				{
 
-					LL_Rotate(lastOutOfSpec); 
+					LL_Rotate(lastOutOfSpec);
 					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
 					else parentOfLastOutSpec->leftChild = returnedNode;
 				}
@@ -138,22 +138,22 @@ void AVL::Insert(char in_key[])
 					if ((parentOfLastOutSpec) && (lastOutOfSpec == parentOfLastOutSpec->leftChild)) leftChild = true;
 					else false;
 
-					RR_Rotate(lastOutOfSpec->leftChild); 
-					lastOutOfSpec->leftChild = returnedNode; 
+					RR_Rotate(lastOutOfSpec->leftChild);
+					lastOutOfSpec->leftChild = returnedNode;
 
-					LL_Rotate(lastOutOfSpec); 
-					
+					LL_Rotate(lastOutOfSpec);
+
 					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
 					else if (leftChild == true) parentOfLastOutSpec->leftChild = returnedNode;
 					else if (leftChild == false) parentOfLastOutSpec->rightChild = returnedNode;
 				}
 			}
-		else if (displacement == -1)
+			else if (displacement == -1)
 			{
 				if (lastOutOfSpec->rightChild->BF == -1)
 				{
 					//call this method to set returnedNode with the root of the rotated subtree
-					RR_Rotate(lastOutOfSpec); 
+					RR_Rotate(lastOutOfSpec);
 
 					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
 					else parentOfLastOutSpec->rightChild = returnedNode;
@@ -161,18 +161,18 @@ void AVL::Insert(char in_key[])
 				else
 				{
 					//determine which side of the tree the insertion occured on 
-					bool leftChild; 
+					bool leftChild;
 					if ((parentOfLastOutSpec) && (lastOutOfSpec == parentOfLastOutSpec->leftChild)) leftChild = true;
-					else false; 
+					else false;
 
-					std::cout << "RL rotation\n"; 
+					std::cout << "RL rotation\n";
 					LL_Rotate(lastOutOfSpec->rightChild);
-					lastOutOfSpec->rightChild = returnedNode; 
+					lastOutOfSpec->rightChild = returnedNode;
 
-					RR_Rotate(lastOutOfSpec); 
+					RR_Rotate(lastOutOfSpec);
 					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
-					else if (leftChild == true) parentOfLastOutSpec->leftChild = returnedNode; 
-					else if (leftChild == false) parentOfLastOutSpec->rightChild = returnedNode; 
+					else if (leftChild == true) parentOfLastOutSpec->leftChild = returnedNode;
+					else if (leftChild == false) parentOfLastOutSpec->rightChild = returnedNode;
 				}
 			}
 		}
@@ -196,12 +196,12 @@ void AVL::LL_Rotate(AVL_Node *rotationPoint)
 	if (newRoot->rightChild) newRoot->rightChild->BF = _calculateBalanceFactor(newRoot->rightChild);
 
 	//clear nodes out of memory here then attach to parent
-	returnedNode = newRoot; 
+	returnedNode = newRoot;
 }
 
 void AVL::RR_Rotate(AVL_Node *rotationPoint)
 {
-	returnedNode = nullptr; 
+	returnedNode = nullptr;
 	std::cout << "RR Rotation\n";
 	AVL_Node *storage = rotationPoint->rightChild->leftChild;
 	AVL_Node *newRoot = rotationPoint->rightChild;
@@ -215,10 +215,10 @@ void AVL::RR_Rotate(AVL_Node *rotationPoint)
 	if (newRoot->rightChild)newRoot->rightChild->BF = _calculateBalanceFactor(newRoot->rightChild);
 
 	//clear nodes out of memory here then attach to parent
-	
+
 	//if (rotationPoint == rootNode) rootNode = newRoot;
 	//else parentOfLastOutSpec->rightChild = newRoot;
-	returnedNode = newRoot; 
+	returnedNode = newRoot;
 }
 
 int AVL::_calculateBalanceFactor(AVL_Node* tippingNode)

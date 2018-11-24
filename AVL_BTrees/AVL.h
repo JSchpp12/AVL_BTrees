@@ -1,4 +1,10 @@
 #pragma once
+#include "pch.h"
+#include "AVL.h"
+#include <io.h>
+#include <iostream>
+#include <string.h>
+
 class AVL
 {
 public:
@@ -24,6 +30,6 @@ private:
 	void RR_Rotate(AVL_Node *rotationPoint);
 	int _calculateBalanceFactor(AVL_Node *tippingNode); 
 	int _getNodeHeight(AVL_Node *focusNode); 
-
+	void _nodeReader(); 
 };
 
