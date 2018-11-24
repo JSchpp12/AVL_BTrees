@@ -2,8 +2,10 @@
 #include "AVL.h"
 #include <io.h>
 #include <iostream>
+#include <fstream>
 #include <string.h>
 
+using namespace std; 
 
 AVL::AVL()
 {
@@ -271,4 +273,17 @@ int AVL::_getNodeHeight(AVL_Node* focusNode)
 			return (ret2 + 1);
 		}
 	}
+}
+
+void AVL::_nodeReader(int index)
+{
+	std::ofstream myfile; 
+	myfile.open(storageFile, ios::out | ios::binary); 
+
+
+}
+
+void AVL::_nodeWriter()
+{
+
 }
