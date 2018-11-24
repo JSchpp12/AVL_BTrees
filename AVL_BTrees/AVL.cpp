@@ -17,6 +17,15 @@ void AVL::Insert(char in_key[])
 	AVL_Node *leaderNode, *laggerNode, *lastOutOfSpec, *parentOfLastOutSpec;
 	int displacement;
 
+	//convert in_key to lowercase for debugging purposes 
+	if (in_key[0] < 90 && in_key[0] >= 65) in_key[0] = in_key[0] + 32;
+
+	if (strcmp(in_key, "the") == 0)
+	{
+		std::cout << "FOCUS"; 
+	}
+
+	std::cout << "Inserting " << in_key << "\n"; 
 	lastOutOfSpec = rootNode;
 	leaderNode = rootNode;
 	parentOfLastOutSpec = laggerNode = nullptr;
@@ -125,9 +134,11 @@ void AVL::Insert(char in_key[])
 			{
 				if (lastOutOfSpec->leftChild->BF == 1)
 				{
-
 					LL_Rotate(lastOutOfSpec);
+					
+					//find what side to put the new root node on the parent node 
 					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
+					else if (strcmp(returnedNode->key, parentOfLastOutSpec->key) > 0) parentOfLastOutSpec->rightChild = returnedNode;
 					else parentOfLastOutSpec->leftChild = returnedNode;
 				}
 				else
@@ -138,7 +149,7 @@ void AVL::Insert(char in_key[])
 					//determine which side of the tree the insertion occured on 
 					bool leftChild;
 					if ((parentOfLastOutSpec) && (lastOutOfSpec == parentOfLastOutSpec->leftChild)) leftChild = true;
-					else false;
+					else leftChild = false;
 
 					RR_Rotate(lastOutOfSpec->leftChild);
 					lastOutOfSpec->leftChild = returnedNode;
@@ -157,15 +168,17 @@ void AVL::Insert(char in_key[])
 					//call this method to set returnedNode with the root of the rotated subtree
 					RR_Rotate(lastOutOfSpec);
 
+					//find what side to put the new root node on the parent node
 					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
-					else parentOfLastOutSpec->rightChild = returnedNode;
+					else if (strcmp(returnedNode->key, parentOfLastOutSpec->key) > 0) parentOfLastOutSpec->rightChild = returnedNode;
+					else parentOfLastOutSpec->leftChild = returnedNode;
 				}
 				else
 				{
 					//determine which side of the tree the insertion occured on 
 					bool leftChild;
 					if ((parentOfLastOutSpec) && (lastOutOfSpec == parentOfLastOutSpec->leftChild)) leftChild = true;
-					else false;
+					else leftChild = false;
 
 					std::cout << "RL rotation\n";
 					LL_Rotate(lastOutOfSpec->rightChild);
@@ -208,6 +221,7 @@ void AVL::RR_Rotate(AVL_Node *rotationPoint)
 	AVL_Node *storage = rotationPoint->rightChild->leftChild;
 	AVL_Node *newRoot = rotationPoint->rightChild;
 
+	//might need to swap these -------------------------------------------------------	
 	newRoot->leftChild = rotationPoint;
 	rotationPoint->rightChild = storage;
 
@@ -279,8 +293,6 @@ void AVL::_nodeReader(int index)
 {
 	std::ofstream myfile; 
 	myfile.open(storageFile, ios::out | ios::binary); 
-
-
 }
 
 void AVL::_nodeWriter()

@@ -20,6 +20,10 @@ public:
 
 	std::string storageFile = "storage.txt"; //file to store the nodes in 
 
+	//use this to store the 3 nodes that are permitted for the memory restriction
+	AVL_Node nodeStorage[2]; 
+	int nodeStorage_index = 0; 
+
 	int writeIndex = 0;
 	AVL_Node *rootNode; 
 	AVL_Node *returnedNode; //using this pointer to return a node to the insert methods from rotation methods 
