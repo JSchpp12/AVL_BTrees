@@ -9,13 +9,25 @@ using namespace std;
 
 AVL::AVL()
 {
-	rootNode = nullptr;
+	AVL_Node blank; 
+
+	remove("storage.txt"); //delete old storage file
+
+	//will write the 0 node, used as NULL -- might not need to do this
+	_nodeWriter(blank);
+
+	delete rootNode; 
 }
 
 void AVL::Insert(char in_key[])
 {
 	AVL_Node *leaderNode, *laggerNode, *lastOutOfSpec, *parentOfLastOutSpec;
 	int displacement;
+
+	AVL_Node newLeader, newLagger; 
+
+	//numbers for reading
+	int numParentLastOutSpec, numOfLastOutSpec; 
 
 	//convert in_key to lowercase for debugging purposes 
 	if (in_key[0] < 90 && in_key[0] >= 65) in_key[0] = in_key[0] + 32;
@@ -28,31 +40,57 @@ void AVL::Insert(char in_key[])
 	std::cout << "Inserting " << in_key << "\n"; 
 	lastOutOfSpec = rootNode;
 	leaderNode = rootNode;
-	parentOfLastOutSpec = laggerNode = nullptr;
+
+	//read the rootNode from the file
+	_nodeReader(numRootNode); 
+	numOfLastOutSpec = numRootNode;
+	newLeader = newLagger = readReturn;  //set leader and lagger nodes as the rootNode
+	delete &readReturn; 
+
+	numParentLastOutSpec = 0; //set parentLastOutSpec to NULL
 
 	//tree is empty 
-	if (rootNode == nullptr)
+	//if (rootNode == nullptr)
+	if (writeIndex == 0)
 	{
-		AVL_Node* newNode = new AVL_Node();
-		strcpy(newNode->key, in_key);
-		newNode->leftChild = nullptr;
-		newNode->rightChild = nullptr;
-		newNode->BF = 0;
-		newNode->counter = 1;
-		rootNode = newNode;
+		//AVL_Node* newNode = new AVL_Node();
+		AVL_Node newNode; 
+		std::strcpy(newNode.key, in_key);
+		//newNode->leftChild = nullptr;
+		//newNode->rightChild = nullptr;
+		newNode.numRightChild = 0; 
+		newNode.numLeftChild = 0; 
+		newNode.fileIndex = 1; 
+		newNode.BF = 0;
+		newNode.counter = 1;
+		numRootNode = 1; 
+
+		//rootNode = newNode; //remove this 
+
+		//write node to the file 
+		_nodeWriter(newNode); 
+
+		_nodeReader(1); 
+		std::cout << "returned key " << readReturn.key; 
 		return;
 	}
+	//ONLY NEWLEADER and NEWLAGGER should be in memory during this process
 	else
 	{
 		do
 		{
-			if (leaderNode != nullptr)
+			char newString[50]; //blank for comparison
+			if (strcmp(newLeader.key, newString) != 0)
 			{
-				if (leaderNode->BF != 0)
+				if (newLeader.BF != 0)
 				{
 					//store last node whose BF != 0 and its parent 
-					lastOutOfSpec = leaderNode;
+					lastOutOfSpec = leaderNode; 
 					parentOfLastOutSpec = laggerNode;
+
+					
+					numOfLastOutSpec = leaderNode->fileIndex;
+					numParentLastOutSpec = laggerNode->fileIndex; 
 				}
 
 				//move laggerNode up to leaderNode
@@ -61,31 +99,86 @@ void AVL::Insert(char in_key[])
 				if (strcmp(leaderNode->key, in_key) == 0)
 				{
 					leaderNode->counter++;
+					//_nodeWriter(leaderNode); 
+
+					//delet the nodes from memory 
+					delete leaderNode, laggerNode, lastOutOfSpec; 
+
 					return;
 				}
 				else if (strcmp(leaderNode->key, in_key) > 0)
 				{
-					if (leaderNode->leftChild != nullptr) leaderNode = leaderNode->leftChild;
+					if (leaderNode->leftChild != nullptr)
+					{
+						int tempFileIndex = leaderNode->numLeftChild;
+						delete leaderNode, returnedNode; 
+
+						//set the leaderNode as the leftChild
+						_nodeReader(tempFileIndex); 
+						leaderNode = returnedNode; 
+
+						leaderNode = leaderNode->leftChild; //remove later --
+					}
 					else leaderNode = nullptr;
 				}
-				else if (leaderNode->rightChild != nullptr)leaderNode = leaderNode->rightChild;
-				else leaderNode = nullptr;
+				else if (leaderNode->rightChild != nullptr)
+				{
+					int tempFileIndex = leaderNode->numLeftChild; 
+					delete leaderNode, returnedNode; 
+
+					//set the leaderNode as the rightChild 
+					_nodeReader(tempFileIndex); 
+					leaderNode = returnedNode; 
+
+					leaderNode = leaderNode->rightChild; //remove later --
+				}
+				else
+				{
+					delete leaderNode; //delete the previous node from memory 
+					leaderNode = nullptr;
+				}
 			}
 			else break;
 		} while (leaderNode != nullptr);
 		//hit leaf position, lagger node is connection point
 
+		//UP UNTIL THIS POINT, ONLY LEADER AND LAGGER NODES WILL BE IN MEMORY, NEWNODE WILL BE 3RD IN MEMORY
 
 		//create new node 
 		AVL_Node* correctionTracker = nullptr;  //use this pointer to correct BFs
 
 		AVL_Node *newNode = new AVL_Node();
 		newNode->counter = 1;
-		strcpy(newNode->key, in_key);
+		newNode->fileIndex = writeIndex; 
+		std::strcpy(newNode->key, in_key);
 
-		if (laggerNode == nullptr) rootNode = newNode;
-		else if (strcmp(laggerNode->key, in_key) > 0) laggerNode->leftChild = newNode;  //new node is left child
-		else laggerNode->rightChild = newNode;
+		writeIndex++;
+
+		//set laggerNode's child pointer to the newNode
+		if (laggerNode == nullptr)
+		{
+			rootNode = newNode; //remove
+
+			numRootNode = newNode->fileIndex; 
+		}
+		else if (strcmp(laggerNode->key, in_key) > 0)
+		{
+			laggerNode->leftChild = newNode;  //new node is left child
+			
+			laggerNode->numLeftChild = newNode->fileIndex; 
+		}
+		else
+		{
+			laggerNode->rightChild = newNode;
+
+			laggerNode->numRightChild = newNode->fileIndex; 
+		}
+
+		//write nodes to file 
+		//_nodeWriter(laggerNode); 
+		//_nodeWriter(newNode); 
+
+		delete laggerNode, newNode; //clear the memory 
 
 		//correct BFs after the insert 
 		if (lastOutOfSpec != nullptr)
@@ -298,15 +391,27 @@ void AVL::_nodeReader(int index)
 	{
 		for (int j = 0; j <= index; j++)
 		{
-			myfile.read((char*)&returnedNode, sizeof(returnedNode));
+			myfile.read((char*)&readReturn, sizeof(readReturn));
+			std::cout << readReturn.key; 
 		}
+		myfile.close(); 
 	}
 	else exit(1); //failed to open file
 }
 
-void AVL::_nodeWriter()
+void AVL::_nodeWriter(AVL_Node targetNode)
 {
+	//write targetNode to the end of the file
 	std::ofstream myfile; 
 	myfile.open(storageFile, ios::app | ios::binary);
 
+	//targetNode->fileIndex = writeIndex; 
+	//writeIndex++; 
+
+	//to overwrite a specific node, skip the ones before it by skipping size of the nodes
+	myfile.seekp(sizeof(targetNode) * targetNode.fileIndex); 
+
+	myfile.write((char*)&targetNode, sizeof(targetNode)); 
+
+	myfile.close(); 
 }

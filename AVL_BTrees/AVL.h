@@ -13,6 +13,8 @@ public:
 		int BF; 
 		int fileIndex;   //where in the file this node is written
 		int counter; 
+		int numLeftChild; 
+		int numRightChild; 
 		AVL_Node *leftChild = nullptr; 
 		AVL_Node *rightChild = nullptr; 
 		char key[50]; 
@@ -25,8 +27,10 @@ public:
 	int nodeStorage_index = 0; 
 
 	int writeIndex = 0;
+	int numRootNode; 
 	AVL_Node *rootNode; 
 	AVL_Node *returnedNode; //using this pointer to return a node to the insert methods from rotation methods 
+	AVL_Node readReturn; 
 	AVL();
 	void Insert(char in_key[]); 
 	
@@ -36,6 +40,6 @@ private:
 	int _calculateBalanceFactor(AVL_Node *tippingNode); 
 	int _getNodeHeight(AVL_Node *focusNode); 
 	void _nodeReader(int index); 
-	void _nodeWriter(); 
+	void _nodeWriter(AVL_Node targetNode); 
 };
 
