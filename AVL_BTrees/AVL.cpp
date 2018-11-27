@@ -292,7 +292,7 @@ int AVL::_getNodeHeight(AVL_Node* focusNode)
 void AVL::_nodeReader(int index)
 {
 	std::ifstream myfile; 
-	myfile.open(storageFile, ios::out | ios::binary); 
+	myfile.open(storageFile, ios::in | ios::binary); 
 
 	if (myfile)
 	{
@@ -306,5 +306,7 @@ void AVL::_nodeReader(int index)
 
 void AVL::_nodeWriter()
 {
+	std::ofstream myfile; 
+	myfile.open(storageFile, ios::app | ios::binary);
 
 }
