@@ -9,12 +9,13 @@ using namespace std;
 
 AVL::AVL()
 {
+	//FIND NEW WAY OF WRITING A BLANK NODE TO THE FILE
 	AVL_Node blank; 
 
 	remove("storage.txt"); //delete old storage file
 
 	//will write the 0 node, used as NULL -- might not need to do this
-	_nodeWriter(blank);
+	_nodeWriter(&blank);
 
 	delete rootNode; 
 }
@@ -24,7 +25,9 @@ void AVL::Insert(char in_key[])
 	AVL_Node *leaderNode, *laggerNode, *lastOutOfSpec, *parentOfLastOutSpec;
 	int displacement;
 
-	AVL_Node newLeader, newLagger; 
+	bool leaderNodeExsist = true; //use this to exit insertion loop
+	bool laggerNodeExsist; 
+	AVL_Node A, B, C; 
 
 	//numbers for reading
 	int numParentLastOutSpec, numOfLastOutSpec; 
@@ -42,275 +45,400 @@ void AVL::Insert(char in_key[])
 	leaderNode = rootNode;
 
 	//read the rootNode from the file
-	_nodeReader(numRootNode); 
-	numOfLastOutSpec = numRootNode;
-	newLeader = newLagger = readReturn;  //set leader and lagger nodes as the rootNode
-	delete &readReturn; 
+	_nodeReader(numRootNode, &A); 
+	B = A; //set leader and lagger nodes as the rootNode
 
-	numParentLastOutSpec = 0; //set parentLastOutSpec to NULL
-
+	numOfLastOutSpec = numParentLastOutSpec = 0; //set both last out of spec to NULL
+ 
 	//tree is empty 
 	//if (rootNode == nullptr)
 	if (writeIndex == 0)
 	{
 		//AVL_Node* newNode = new AVL_Node();
 		AVL_Node newNode; 
-		std::strcpy(newNode.key, in_key);
+		std::strcpy(C.key, in_key);
 		//newNode->leftChild = nullptr;
 		//newNode->rightChild = nullptr;
-		newNode.numRightChild = 0; 
-		newNode.numLeftChild = 0; 
-		newNode.fileIndex = 1; 
-		newNode.BF = 0;
-		newNode.counter = 1;
+		C.numRightChild = 0; 
+		C.numLeftChild = 0; 
+		C.fileIndex = 1; 
+		C.BF = 0;
+		C.counter = 1;
+
 		numRootNode = 1; 
 
 		//rootNode = newNode; //remove this 
 
 		//write node to the file 
-		_nodeWriter(newNode); 
+		_nodeWriter(&C); 
 
-		_nodeReader(1); 
-		std::cout << "returned key " << readReturn.key; 
+		_nodeReader(1, &A); 
+		std::cout << "returned key " << A.key; 
+		delete &A; 
 		return;
 	}
-	//ONLY NEWLEADER and NEWLAGGER should be in memory during this process
+	//ONLY A and B should be in memory during this process
 	else
 	{
 		do
 		{
 			char newString[50]; //blank for comparison
-			if (strcmp(newLeader.key, newString) != 0)
+			if (strcmp(A.key, newString) != 0)
 			{
-				if (newLeader.BF != 0)
+				if (A.BF != 0)
 				{
 					//store last node whose BF != 0 and its parent 
 					lastOutOfSpec = leaderNode; 
 					parentOfLastOutSpec = laggerNode;
-
 					
-					numOfLastOutSpec = leaderNode->fileIndex;
-					numParentLastOutSpec = laggerNode->fileIndex; 
+					//these are for memory restriction
+					numOfLastOutSpec = A.fileIndex; 
+					numParentLastOutSpec = B.fileIndex; 
 				}
 
-				//move laggerNode up to leaderNode
-				laggerNode = leaderNode;
+				//move laggerNode up to leaderNode 
+				B = A; 
 
-				if (strcmp(leaderNode->key, in_key) == 0)
+				//if (strcmp(leaderNode->key, in_key) == 0)
+				if (strcmp(A.key, in_key) == 0)
 				{
 					leaderNode->counter++;
-					//_nodeWriter(leaderNode); 
+					A.counter++; 
+ 
+					_nodeWriter(&A); //update A 
 
-					//delet the nodes from memory 
-					delete leaderNode, laggerNode, lastOutOfSpec; 
+					leaderNodeExsist = false; //continue loop
 
 					return;
 				}
-				else if (strcmp(leaderNode->key, in_key) > 0)
+				//else if (strcmp(leaderNode->key, in_key) > 0)
+				else if (strcmp(A.key, in_key) > 0)
 				{
-					if (leaderNode->leftChild != nullptr)
+					//if (leaderNode->leftChild != nullptr)
+					if (A.numLeftChild != 0)
 					{
-						int tempFileIndex = leaderNode->numLeftChild;
-						delete leaderNode, returnedNode; 
+						int tempFileIndex = A.numLeftChild; 
+						delete &A, &B; 
 
 						//set the leaderNode as the leftChild
-						_nodeReader(tempFileIndex); 
-						leaderNode = returnedNode; 
+						_nodeReader(tempFileIndex, &A);
+
+						leaderNodeExsist = true; //continue loop
 
 						leaderNode = leaderNode->leftChild; //remove later --
 					}
-					else leaderNode = nullptr;
+					//else leaderNode = nullptr;
+					else leaderNodeExsist = false; 
 				}
-				else if (leaderNode->rightChild != nullptr)
+				//else if (leaderNode->rightChild != nullptr)
+				else if (A.numRightChild != 0)
 				{
-					int tempFileIndex = leaderNode->numLeftChild; 
-					delete leaderNode, returnedNode; 
+					int tempFileIndex = leaderNode->numLeftChild;
 
 					//set the leaderNode as the rightChild 
-					_nodeReader(tempFileIndex); 
-					leaderNode = returnedNode; 
+					_nodeReader(tempFileIndex, &A);  
 
 					leaderNode = leaderNode->rightChild; //remove later --
 				}
 				else
 				{
-					delete leaderNode; //delete the previous node from memory 
+					delete &A; //delete the previous node from memory 
 					leaderNode = nullptr;
+
+					leaderNodeExsist = false; //exit the loop - hit a leaf
 				}
 			}
 			else break;
-		} while (leaderNode != nullptr);
+		} while (leaderNodeExsist != false);
 		//hit leaf position, lagger node is connection point
 
 		//UP UNTIL THIS POINT, ONLY LEADER AND LAGGER NODES WILL BE IN MEMORY, NEWNODE WILL BE 3RD IN MEMORY
 
 		//create new node 
-		AVL_Node* correctionTracker = nullptr;  //use this pointer to correct BFs
+		int correctionTracker = 0;  //use this pointer to correct BFs
 
-		AVL_Node *newNode = new AVL_Node();
-		newNode->counter = 1;
-		newNode->fileIndex = writeIndex; 
-		std::strcpy(newNode->key, in_key);
+		int newNodeIndex = writeIndex; //save index where new leaf is written
+
+		//C is set as the newNode
+		C.counter = 1;
+		C.fileIndex = writeIndex; 
+		std::strcpy(C.key, in_key);
+
+		_nodeWriter(&C);  //write newNode to file for storage
 
 		writeIndex++;
 
 		//set laggerNode's child pointer to the newNode
 		if (laggerNode == nullptr)
 		{
-			rootNode = newNode; //remove
-
-			numRootNode = newNode->fileIndex; 
+			//set root, might not need this 
+			numRootNode = C.fileIndex; 
 		}
-		else if (strcmp(laggerNode->key, in_key) > 0)
+		else if (strcmp(B.key, in_key) > 0)
 		{
-			laggerNode->leftChild = newNode;  //new node is left child
-			
-			laggerNode->numLeftChild = newNode->fileIndex; 
+			//set laggerNodes new child
+			B.numLeftChild = C.fileIndex;
+			_nodeWriter(&B); 
 		}
 		else
 		{
-			laggerNode->rightChild = newNode;
-
-			laggerNode->numRightChild = newNode->fileIndex; 
-		}
-
-		//write nodes to file 
-		//_nodeWriter(laggerNode); 
-		//_nodeWriter(newNode); 
-
-		delete laggerNode, newNode; //clear the memory 
+			//set laggerNode's new child
+			B.numRightChild = C.fileIndex;
+			_nodeWriter(&B);
+		}  
 
 		//correct BFs after the insert 
-		if (lastOutOfSpec != nullptr)
+		//if (lastOutOfSpec != nullptr)
+		if (numOfLastOutSpec != 0)
 		{
-			if (strcmp(in_key, lastOutOfSpec->key) > 0)
+			//A is set as lastOutOfSpec
+			_nodeReader(numOfLastOutSpec, &A);
+
+			if (strcmp(in_key, A.key) > 0)
 			{
 				displacement = -1;
-				correctionTracker = lastOutOfSpec->rightChild;
+				correctionTracker = A.numRightChild;
 			}
 			else
 			{
 				displacement = 1;
-				correctionTracker = lastOutOfSpec->leftChild;
+				correctionTracker = A.numLeftChild;
 			}
 
-			while (correctionTracker != newNode)
+			_nodeReader(correctionTracker, &A); //read in correctionTracker -> A
+			while (correctionTracker != newNodeIndex)
 			{
-				if (strcmp(in_key, correctionTracker->key) > 0)
+				if (strcmp(in_key, A.key) > 0)
 				{
-					correctionTracker->BF = -1;
-					correctionTracker = correctionTracker->rightChild;
+					int childIndex = A.numRightChild;
+					A.BF = -1;
+					_nodeWriter(&A);
+
+					_nodeReader(childIndex, &A);
+
+					correctionTracker = childIndex;
 				}
 				else
 				{
-					correctionTracker->BF = 1;
-					correctionTracker = correctionTracker->leftChild;
+					int childIndex = A.numLeftChild;
+					A.BF = 1;
+					_nodeWriter(&A);
+
+					_nodeReader(childIndex, &A); //read in child node
+					correctionTracker = childIndex; //set correctionTracker to tell when hit newNode
 				}
 			}
 
+			//A will be newNode at this point 
+
+			_nodeReader(numOfLastOutSpec, &A); 	//read in lastOutOfSpec -> A 
+
 			//adjust BF of first node that previously had a BF that was + or - 1
-			if (lastOutOfSpec->BF == 0)
+			if (A.BF == 0)
 			{
 				//only slightly out of balance but acceptable
-				lastOutOfSpec->BF = displacement;
+				A.BF = displacement;
+				_nodeWriter(&A);
+
 				return;
 			}
-			if (lastOutOfSpec->BF == -displacement)
+			if (A.BF == -displacement)
 			{
 				//insert returned tree to balance
-				lastOutOfSpec->BF = 0;
+				A.BF = 0;
+				_nodeWriter(&A);
+
 				return;
 			}
 
 			//if neither of the two returns above are hit, the tree is not balanced 
 			if (displacement == 1)
 			{
-				if (lastOutOfSpec->leftChild->BF == 1)
+				_nodeReader(A.numLeftChild, &C); 
+				if (C.BF == 1)
 				{
-					LL_Rotate(lastOutOfSpec);
-					
+					//A will be rotationCenter -- return root of rotated subtree in B
+
+					LL_Rotate(&A, &B, &C);
+
+					//root of rotated subtree = B
+
+					_nodeReader(numParentLastOutSpec, &C);
+
 					//find what side to put the new root node on the parent node 
-					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
-					else if (strcmp(returnedNode->key, parentOfLastOutSpec->key) > 0) parentOfLastOutSpec->rightChild = returnedNode;
-					else parentOfLastOutSpec->leftChild = returnedNode;
+					if (numOfLastOutSpec == numRootNode) numRootNode = B.fileIndex;
+					else if (strcmp(B.key, C.key) > 0)
+					{
+						C.numRightChild = B.fileIndex;
+						_nodeWriter(&C); //update C
+					}
+					else
+					{
+						C.numLeftChild = B.fileIndex;
+						_nodeWriter(&C);
+					}
 				}
 				else
 				{
 					//LR Rotation -- RR Rotation and then a LL rotation
 					std::cout << "LR\n";
 
-					//determine which side of the tree the insertion occured on 
+					//determine which side of the tree the insertion occured on -- only need A = lastOutOfSpec
+
+					_nodeReader(numParentLastOutSpec, &B);
+
 					bool leftChild;
-					if ((parentOfLastOutSpec) && (lastOutOfSpec == parentOfLastOutSpec->leftChild)) leftChild = true;
+					if ((numParentLastOutSpec != 0) && (numOfLastOutSpec == B.numLeftChild)) leftChild = true;
 					else leftChild = false;
 
-					RR_Rotate(lastOutOfSpec->leftChild);
-					lastOutOfSpec->leftChild = returnedNode;
+					int numLast = A.fileIndex;
+					int numLast_leftChild = A.numLeftChild;
+					int numLast_rightChild = A.numRightChild;
 
-					LL_Rotate(lastOutOfSpec);
+					_nodeReader(numLast_leftChild, &A);
+					RR_Rotate(&A, &B, &C);
+					_nodeReader(numOfLastOutSpec, &A); //read in last out of spec into A
 
-					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
-					else if (leftChild == true) parentOfLastOutSpec->leftChild = returnedNode;
-					else if (leftChild == false) parentOfLastOutSpec->rightChild = returnedNode;
+					A.numLeftChild = B.fileIndex;
+					_nodeWriter(&A);
+
+					//need to read in lastOutOfSpec again 
+
+					LL_Rotate(&A, &B, &C);
+
+					_nodeReader(numParentLastOutSpec, &C); //read in parent of last out of spec into C
+
+					if (numOfLastOutSpec == numRootNode) numRootNode = B.fileIndex;
+					else if (strcmp(B.key, C.key) > 0)
+					{
+						C.numRightChild = B.fileIndex;
+						_nodeWriter(&C); //update C
+					}
+					else
+					{
+						C.numLeftChild = B.fileIndex;
+						_nodeWriter(&C);
+					}
 				}
 			}
 			else if (displacement == -1)
 			{
-				if (lastOutOfSpec->rightChild->BF == -1)
+				_nodeReader(A.numRightChild, &C);
+				if (C.BF == -1)
 				{
 					//call this method to set returnedNode with the root of the rotated subtree
-					RR_Rotate(lastOutOfSpec);
+					RR_Rotate(&A, &B, &C);
 
-					//find what side to put the new root node on the parent node
-					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
-					else if (strcmp(returnedNode->key, parentOfLastOutSpec->key) > 0) parentOfLastOutSpec->rightChild = returnedNode;
-					else parentOfLastOutSpec->leftChild = returnedNode;
+					if (numOfLastOutSpec == numRootNode) numRootNode = B.fileIndex;
+					else if (strcmp(B.key, C.key) > 0)
+					{
+						C.numRightChild = B.fileIndex;
+						_nodeWriter(&C); //update C
+					}
+					else
+					{
+						C.numLeftChild = B.fileIndex;
+						_nodeWriter(&C);
+					}
 				}
 				else
 				{
+					_nodeReader(numParentLastOutSpec, &B);
 					//determine which side of the tree the insertion occured on 
 					bool leftChild;
-					if ((parentOfLastOutSpec) && (lastOutOfSpec == parentOfLastOutSpec->leftChild)) leftChild = true;
+					if ((numParentLastOutSpec != 0) && (A.fileIndex == B.numLeftChild)) leftChild = true;
 					else leftChild = false;
 
 					std::cout << "RL rotation\n";
-					LL_Rotate(lastOutOfSpec->rightChild);
-					lastOutOfSpec->rightChild = returnedNode;
+					
+					int numLast = A.fileIndex;
+					int numLast_leftChild = A.numLeftChild;
+					int numLast_rightChild = A.numRightChild;
 
-					RR_Rotate(lastOutOfSpec);
-					if (lastOutOfSpec == rootNode) rootNode = returnedNode;
-					else if (leftChild == true) parentOfLastOutSpec->leftChild = returnedNode;
-					else if (leftChild == false) parentOfLastOutSpec->rightChild = returnedNode;
+					_nodeReader(numLast_rightChild, &A); 
+					LL_Rotate(&A, &B, &C);
+					//set lastOutOfSpec child
+					_nodeReader(numOfLastOutSpec, &A); 
+					A.numRightChild = B.fileIndex; 
+					_nodeWriter(&A); 
+
+					RR_Rotate(&A, &B, &C);
+
+					_nodeReader(numParentLastOutSpec, &C); //read in parent of last out of spec into C
+
+					if (numOfLastOutSpec == numRootNode) numRootNode = B.fileIndex;
+					else if (strcmp(B.key, C.key) > 0)
+					{
+						C.numRightChild = B.fileIndex;
+						_nodeWriter(&C); //update C
+					}
+					else
+					{
+						C.numLeftChild = B.fileIndex;
+						_nodeWriter(&C);
+					}
 				}
 			}
 		}
 	}
 }
 
-void AVL::LL_Rotate(AVL_Node *rotationPoint)
+void AVL::LL_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C)
 {
-	returnedNode = nullptr; //reset return node so that this can be set 
+	//pass in the 3 nodes that will be used for memory
+	//B will be empty 
+	//C will be parent of rotated tree
+	//A = rotationPoint
 
 	std::cout << "LL Rotate \n";
 	AVL_Node *storage = rotationPoint->leftChild->rightChild;
 	AVL_Node *newRoot = rotationPoint->leftChild;
 
-	newRoot->rightChild = rotationPoint;
-	rotationPoint->leftChild = storage;
+	_nodeReader(rotationPoint->numLeftChild, B); //B is now newRoot
+	int numStorage = B->numRightChild; //save storage
 
-	//update BFs 
-	newRoot->BF = _calculateBalanceFactor(newRoot);
-	if (newRoot->leftChild) newRoot->leftChild->BF = _calculateBalanceFactor(newRoot->leftChild);
-	if (newRoot->rightChild) newRoot->rightChild->BF = _calculateBalanceFactor(newRoot->rightChild);
+	//do actual rotation
+	B->numRightChild = rotationPoint->fileIndex; 
+	rotationPoint->numLeftChild = numStorage; 
 
-	//clear nodes out of memory here then attach to parent
-	returnedNode = newRoot;
+	//save these after rotation
+	_nodeWriter(rotationPoint); 
+
+	//B->rightChild = rotationPOint
+	//B->leftChild = -- unchanged --
+
+	//Update BFs
+	rotationPoint = B;
+	B->BF = _calculateBalanceFactor(rotationPoint);
+	_nodeWriter(B); //save B
+
+	if (B->numLeftChild != 0)
+	{
+		//ONLY NEED B RIGHT NOW
+		//read the child into C --this will overwright grandparent 
+		_nodeReader(B->numLeftChild, C); 
+		rotationPoint = C; 
+
+		C->BF = _calculateBalanceFactor(rotationPoint);
+
+		_nodeWriter(C); //save C
+	}
+	if (B->rightChild)
+	{
+		_nodeReader(B->numRightChild, C); 
+		rotationPoint = C; 
+
+		C->BF = _calculateBalanceFactor(rotationPoint);
+
+		_nodeWriter(C); //save C
+	}
+	//B will be newRoot -- handle after calling this method 
 }
 
-void AVL::RR_Rotate(AVL_Node *rotationPoint)
+void AVL::RR_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C)
 {
-	returnedNode = nullptr;
 	std::cout << "RR Rotation\n";
+
 	AVL_Node *storage = rotationPoint->rightChild->leftChild;
 	AVL_Node *newRoot = rotationPoint->rightChild;
 
@@ -318,56 +446,100 @@ void AVL::RR_Rotate(AVL_Node *rotationPoint)
 	newRoot->leftChild = rotationPoint;
 	rotationPoint->rightChild = storage;
 
-	//update BFs 
-	newRoot->BF = _calculateBalanceFactor(newRoot);
-	newRoot->leftChild->BF = _calculateBalanceFactor(newRoot->leftChild);
-	if (newRoot->rightChild)newRoot->rightChild->BF = _calculateBalanceFactor(newRoot->rightChild);
+	_nodeReader(rotationPoint->numRightChild, B); //B is now newRoot
+	int numStorage = B->numLeftChild; //save storage
 
-	//clear nodes out of memory here then attach to parent
+	//actual rotation 
+	B->numLeftChild = rotationPoint->fileIndex;
+	rotationPoint->numRightChild = numStorage;
 
-	//if (rotationPoint == rootNode) rootNode = newRoot;
-	//else parentOfLastOutSpec->rightChild = newRoot;
-	returnedNode = newRoot;
+	//save these after rotation
+	_nodeWriter(rotationPoint);
+
+	//B->rightChild = rotationPOint
+	//B->leftChild = -- unchanged --
+
+	//Update BFs
+	rotationPoint = B;
+	B->BF = _calculateBalanceFactor(rotationPoint);
+	_nodeWriter(B); //save B
+
+	//update BFs
+	if (B->numLeftChild != 0)
+	{
+		//ONLY NEED B RIGHT NOW
+		//read the child into C --this will overwright grandparent 
+		_nodeReader(B->numLeftChild, C);
+		rotationPoint = C;
+
+		C->BF = _calculateBalanceFactor(rotationPoint);
+
+		_nodeWriter(C); //save C
+	}
+	if (B->rightChild)
+	{
+		_nodeReader(B->numRightChild, C);
+		rotationPoint = C;
+
+		C->BF = _calculateBalanceFactor(rotationPoint);
+
+		_nodeWriter(C); //save C
+	}
+	//B will be newRoot -- handle after calling this method 
 }
 
 int AVL::_calculateBalanceFactor(AVL_Node* tippingNode)
 {
-	int rightHeight, leftHeight;
-	if (tippingNode->rightChild != nullptr)
+	int rightHeight, leftHeight, storedNode; 
+	storedNode = tippingNode->fileIndex;
+
+	if (tippingNode->numRightChild != 0)
 	{
-		rightHeight = (_getNodeHeight(tippingNode->rightChild) + 1);
+		_nodeReader(tippingNode->numRightChild, tippingNode); 
+		rightHeight = (_getNodeHeight(tippingNode) + 1);
 	}
 	else rightHeight = 0;
 
-	if (tippingNode->leftChild != nullptr)
+	_nodeReader(storedNode, tippingNode); //back to stored node 
+
+	if (tippingNode->numLeftChild != 0)
 	{
-		leftHeight = (_getNodeHeight(tippingNode->leftChild) + 1);
+		_nodeReader(tippingNode->numLeftChild, tippingNode); 
+		leftHeight = (_getNodeHeight(tippingNode) + 1);
 	}
 	else leftHeight = 0;
 
-	_getNodeHeight(tippingNode);
+	//_getNodeHeight(tippingNode); //not sure why this is here -- mistake??
 	return (leftHeight - rightHeight);
 }
 
 int AVL::_getNodeHeight(AVL_Node* focusNode)
 {
+	//WILL OVERWRIGHT WHATEVER NODE IS PASSED INTO THIS METHOD
 	int ret1, ret2;
+	int savedNode = focusNode->fileIndex; 
+
 	//calculate the height of the node 
-	if ((focusNode->rightChild == nullptr) && (focusNode->leftChild == nullptr))
+	if ((focusNode->numRightChild == 0) && (focusNode->numLeftChild == 0))
 	{
 		return 0;
 	}
 	else
 	{
-		if (focusNode->rightChild != nullptr)
+		if (focusNode->numRightChild != 0)
 		{
-			ret1 = _getNodeHeight(focusNode->rightChild);
+			_nodeReader(focusNode->numRightChild, focusNode); 
+			ret1 = _getNodeHeight(focusNode);
 		}
 		else ret1 = 0;
 
-		if (focusNode->leftChild != nullptr)
+		_nodeReader(savedNode, focusNode); //set back to origional node
+
+		if (focusNode->numLeftChild != 0)
 		{
-			ret2 = _getNodeHeight(focusNode->leftChild);
+			_nodeReader(focusNode->numLeftChild, focusNode); 
+
+			ret2 = _getNodeHeight(focusNode);
 		}
 		else ret2 = 0;
 
@@ -382,7 +554,7 @@ int AVL::_getNodeHeight(AVL_Node* focusNode)
 	}
 }
 
-void AVL::_nodeReader(int index)
+void AVL::_nodeReader(int index, AVL_Node* returnedNode)
 {
 	std::ifstream myfile; 
 	myfile.open(storageFile, ios::in | ios::binary); 
@@ -391,15 +563,14 @@ void AVL::_nodeReader(int index)
 	{
 		for (int j = 0; j <= index; j++)
 		{
-			myfile.read((char*)&readReturn, sizeof(readReturn));
-			std::cout << readReturn.key; 
+			myfile.read((char*)returnedNode, sizeof(returnedNode));
 		}
 		myfile.close(); 
 	}
 	else exit(1); //failed to open file
 }
 
-void AVL::_nodeWriter(AVL_Node targetNode)
+void AVL::_nodeWriter(AVL_Node *targetNode)
 {
 	//write targetNode to the end of the file
 	std::ofstream myfile; 
@@ -409,9 +580,9 @@ void AVL::_nodeWriter(AVL_Node targetNode)
 	//writeIndex++; 
 
 	//to overwrite a specific node, skip the ones before it by skipping size of the nodes
-	myfile.seekp(sizeof(targetNode) * targetNode.fileIndex); 
+	myfile.seekp(sizeof(targetNode) * targetNode->fileIndex); 
 
-	myfile.write((char*)&targetNode, sizeof(targetNode)); 
+	myfile.write((char*)targetNode, sizeof(targetNode)); 
 
 	myfile.close(); 
 }

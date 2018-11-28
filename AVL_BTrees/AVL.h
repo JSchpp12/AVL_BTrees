@@ -29,17 +29,16 @@ public:
 	int writeIndex = 0;
 	int numRootNode; 
 	AVL_Node *rootNode; 
-	AVL_Node *returnedNode; //using this pointer to return a node to the insert methods from rotation methods 
-	AVL_Node readReturn; 
+
 	AVL();
 	void Insert(char in_key[]); 
 	
 private: 
-	void LL_Rotate(AVL_Node *rotationPoint); 
-	void RR_Rotate(AVL_Node *rotationPoint);
+	void LL_Rotate(AVL_Node *rotationPoint,AVL_Node *B ,AVL_Node *C); 
+	void RR_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C);
 	int _calculateBalanceFactor(AVL_Node *tippingNode); 
 	int _getNodeHeight(AVL_Node *focusNode); 
-	void _nodeReader(int index); 
-	void _nodeWriter(AVL_Node targetNode); 
+	void _nodeReader(int index, AVL_Node* retrunedNode); 
+	void _nodeWriter(AVL_Node *targetNode); 
 };
 
