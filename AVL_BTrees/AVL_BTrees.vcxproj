@@ -152,11 +152,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AVL.h" />
+    <ClInclude Include="B_Node.h" />
+    <ClInclude Include="B_Tree.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AVL.cpp" />
     <ClCompile Include="AVL_BTrees.cpp" />
+    <ClCompile Include="B_Node.cpp" />
+    <ClCompile Include="B_Tree.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

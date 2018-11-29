@@ -21,6 +21,12 @@
     <ClInclude Include="AVL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="B_Tree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="B_Node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -30,6 +36,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AVL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="B_Tree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="B_Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
