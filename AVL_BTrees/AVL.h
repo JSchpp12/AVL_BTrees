@@ -15,8 +15,6 @@ public:
 		int counter; 
 		int numLeftChild; 
 		int numRightChild; 
-		AVL_Node *leftChild = nullptr; 
-		AVL_Node *rightChild = nullptr; 
 		char key[50]; 
 	};
 
@@ -26,7 +24,7 @@ public:
 	AVL_Node nodeStorage[2]; 
 	int nodeStorage_index = 0; 
 
-	int writeIndex = 0;
+	int writeIndex = 0; 
 	int numRootNode; 
 	AVL_Node *rootNode; 
 
@@ -40,5 +38,6 @@ private:
 	int _getNodeHeight(AVL_Node *focusNode); 
 	void _nodeReader(int index, AVL_Node* retrunedNode); 
 	void _nodeWriter(AVL_Node *targetNode); 
+	void _readFile();
 };
 

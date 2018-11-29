@@ -10,14 +10,19 @@ using namespace std;
 AVL::AVL()
 {
 	//FIND NEW WAY OF WRITING A BLANK NODE TO THE FILE
-	AVL_Node blank; 
-
-	remove("storage.txt"); //delete old storage file
-
-	//will write the 0 node, used as NULL -- might not need to do this
-	_nodeWriter(&blank);
-
-	delete rootNode; 
+	/*
+	AVL_Node blank;  
+	blank.BF = 123; 
+	blank.fileIndex = 0; 
+	blank.numLeftChild = 0; 
+	blank.numRightChild = 0; 
+	blank.counter = 0;
+	strcpy(blank.key, "NULLNODE"); 
+	*/ 
+	if (remove("storage.txt") != 0)
+	{
+		std::cout << "cannot delete"; 
+	}
 }
 
 void AVL::Insert(char in_key[])
@@ -41,8 +46,6 @@ void AVL::Insert(char in_key[])
 	}
 
 	std::cout << "Inserting " << in_key << "\n"; 
-	lastOutOfSpec = rootNode;
-	leaderNode = rootNode;
 
 	//read the rootNode from the file
 	_nodeReader(numRootNode, &A); 
@@ -64,17 +67,14 @@ void AVL::Insert(char in_key[])
 		C.fileIndex = 1; 
 		C.BF = 0;
 		C.counter = 1;
-
+		writeIndex = 2; 
 		numRootNode = 1; 
 
 		//rootNode = newNode; //remove this 
 
 		//write node to the file 
 		_nodeWriter(&C); 
-
-		_nodeReader(1, &A); 
-		std::cout << "returned key " << A.key; 
-		delete &A; 
+		//delete &A; 
 		return;
 	}
 	//ONLY A and B should be in memory during this process
@@ -86,11 +86,7 @@ void AVL::Insert(char in_key[])
 			if (strcmp(A.key, newString) != 0)
 			{
 				if (A.BF != 0)
-				{
-					//store last node whose BF != 0 and its parent 
-					lastOutOfSpec = leaderNode; 
-					parentOfLastOutSpec = laggerNode;
-					
+				{	
 					//these are for memory restriction
 					numOfLastOutSpec = A.fileIndex; 
 					numParentLastOutSpec = B.fileIndex; 
@@ -102,7 +98,7 @@ void AVL::Insert(char in_key[])
 				//if (strcmp(leaderNode->key, in_key) == 0)
 				if (strcmp(A.key, in_key) == 0)
 				{
-					leaderNode->counter++;
+					//leaderNode->counter++;
 					A.counter++; 
  
 					_nodeWriter(&A); //update A 
@@ -117,15 +113,9 @@ void AVL::Insert(char in_key[])
 					//if (leaderNode->leftChild != nullptr)
 					if (A.numLeftChild != 0)
 					{
-						int tempFileIndex = A.numLeftChild; 
-						delete &A, &B; 
-
 						//set the leaderNode as the leftChild
-						_nodeReader(tempFileIndex, &A);
-
+						_nodeReader(A.numLeftChild, &A);
 						leaderNodeExsist = true; //continue loop
-
-						leaderNode = leaderNode->leftChild; //remove later --
 					}
 					//else leaderNode = nullptr;
 					else leaderNodeExsist = false; 
@@ -133,16 +123,13 @@ void AVL::Insert(char in_key[])
 				//else if (leaderNode->rightChild != nullptr)
 				else if (A.numRightChild != 0)
 				{
-					int tempFileIndex = leaderNode->numLeftChild;
-
 					//set the leaderNode as the rightChild 
-					_nodeReader(tempFileIndex, &A);  
-
-					leaderNode = leaderNode->rightChild; //remove later --
+					_nodeReader(A.numRightChild, &A);  
+					leaderNodeExsist = true; 
 				}
 				else
 				{
-					delete &A; //delete the previous node from memory 
+					//delete A; //delete the previous node from memory 
 					leaderNode = nullptr;
 
 					leaderNodeExsist = false; //exit the loop - hit a leaf
@@ -161,7 +148,10 @@ void AVL::Insert(char in_key[])
 
 		//C is set as the newNode
 		C.counter = 1;
-		C.fileIndex = writeIndex; 
+		C.BF = 0; 
+		C.fileIndex = writeIndex;
+		C.numLeftChild = 0; 
+		C.numRightChild = 0; 
 		std::strcpy(C.key, in_key);
 
 		_nodeWriter(&C);  //write newNode to file for storage
@@ -169,12 +159,14 @@ void AVL::Insert(char in_key[])
 		writeIndex++;
 
 		//set laggerNode's child pointer to the newNode
-		if (laggerNode == nullptr)
+		/*
+		if (laggerNodeExsist == false)
 		{
 			//set root, might not need this 
 			numRootNode = C.fileIndex; 
 		}
-		else if (strcmp(B.key, in_key) > 0)
+		*/ 
+		if (strcmp(B.key, in_key) > 0)
 		{
 			//set laggerNodes new child
 			B.numLeftChild = C.fileIndex;
@@ -381,6 +373,7 @@ void AVL::Insert(char in_key[])
 			}
 		}
 	}
+	_readFile(); 
 }
 
 void AVL::LL_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C)
@@ -391,8 +384,8 @@ void AVL::LL_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C)
 	//A = rotationPoint
 
 	std::cout << "LL Rotate \n";
-	AVL_Node *storage = rotationPoint->leftChild->rightChild;
-	AVL_Node *newRoot = rotationPoint->leftChild;
+	//AVL_Node *storage = rotationPoint->leftChild->rightChild;
+	//AVL_Node *newRoot = rotationPoint->leftChild;
 
 	_nodeReader(rotationPoint->numLeftChild, B); //B is now newRoot
 	int numStorage = B->numRightChild; //save storage
@@ -423,7 +416,7 @@ void AVL::LL_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C)
 
 		_nodeWriter(C); //save C
 	}
-	if (B->rightChild)
+	if (B->numRightChild != 0)
 	{
 		_nodeReader(B->numRightChild, C); 
 		rotationPoint = C; 
@@ -439,12 +432,12 @@ void AVL::RR_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C)
 {
 	std::cout << "RR Rotation\n";
 
-	AVL_Node *storage = rotationPoint->rightChild->leftChild;
-	AVL_Node *newRoot = rotationPoint->rightChild;
+	//AVL_Node *storage = rotationPoint->rightChild->leftChild;
+	//AVL_Node *newRoot = rotationPoint->rightChild;
 
 	//might need to swap these -------------------------------------------------------	
-	newRoot->leftChild = rotationPoint;
-	rotationPoint->rightChild = storage;
+	//newRoot->leftChild = rotationPoint;
+	//rotationPoint->rightChild = storage;
 
 	_nodeReader(rotationPoint->numRightChild, B); //B is now newRoot
 	int numStorage = B->numLeftChild; //save storage
@@ -476,7 +469,7 @@ void AVL::RR_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C)
 
 		_nodeWriter(C); //save C
 	}
-	if (B->rightChild)
+	if (B->numRightChild != 0)
 	{
 		_nodeReader(B->numRightChild, C);
 		rotationPoint = C;
@@ -556,33 +549,64 @@ int AVL::_getNodeHeight(AVL_Node* focusNode)
 
 void AVL::_nodeReader(int index, AVL_Node* returnedNode)
 {
+	AVL_Node newNode; 
+	int BF = 111;
+	int fileIndex; 
+	int counter;
+	int numLeftChild; 
+	int numRightChild; 
+	char key[50];
+
 	std::ifstream myfile; 
 	myfile.open(storageFile, ios::in | ios::binary); 
-
+	myfile.seekg(0, ios::beg); 
+	std::cout << "beginning read \n"; 
 	if (myfile)
 	{
 		for (int j = 0; j <= index; j++)
 		{
-			myfile.read((char*)returnedNode, sizeof(returnedNode));
+			myfile.read((char*)returnedNode, sizeof(AVL_Node));
+			std::cout << returnedNode->key << " ....END \n"; 
 		}
-		myfile.close(); 
+		myfile.close();  
 	}
-	else exit(1); //failed to open file
+	//else exit(1); //failed to open file
 }
 
 void AVL::_nodeWriter(AVL_Node *targetNode)
 {
-	//write targetNode to the end of the file
+	int size = sizeof(AVL_Node); 
+	int position = ((targetNode->fileIndex - 1) * sizeof(AVL_Node));
 	std::ofstream myfile; 
-	myfile.open(storageFile, ios::app | ios::binary);
-
-	//targetNode->fileIndex = writeIndex; 
-	//writeIndex++; 
-
+	myfile.open(storageFile, ios::binary);
 	//to overwrite a specific node, skip the ones before it by skipping size of the nodes
-	myfile.seekp(sizeof(targetNode) * targetNode->fileIndex); 
+	//myfile.seekp(0, ios::beg); 
+	myfile.seekp(position, ios::beg);
+	if (!myfile.eof())
+	{
+		myfile.write((char*)targetNode, sizeof(AVL_Node));
+		//myfile.write((char*)&BF, sizeof(&BF)); 
+		myfile.close();
+	}
 
-	myfile.write((char*)targetNode, sizeof(targetNode)); 
+	_readFile(); 
+}
 
-	myfile.close(); 
+void AVL::_readFile()
+{
+	AVL_Node newNode; 
+	std::ifstream myfile;
+	myfile.open(storageFile, ios::in | ios::binary);
+	myfile.seekg(0, ios::beg);
+
+	std::cout << "beginning read WHOLE FILE\n";
+
+		while (!myfile.eof())
+		{
+			strcpy(newNode.key, "NULL"); 
+			myfile.read((char*)&newNode, sizeof(AVL_Node));
+			std::cout << newNode.key << "end\n";
+		}
+	myfile.close();
+
 }
