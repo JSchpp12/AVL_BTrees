@@ -187,18 +187,9 @@ void AVL::Insert(char in_key[])
 		C.numRightChild = 0; 
 		std::strcpy(C.key, in_key);
 
-		_nodeWriter(&C);  //write newNode to file for storage
-		_readFile(); 
+		_nodeWriter(&C);  //write newNode to file for storage 
 		writeIndex++;
-
-		//set laggerNode's child pointer to the newNode
-		/*
-		if (laggerNodeExsist == false)
-		{
-			//set root, might not need this 
-			numRootNode = C.fileIndex; 
-		}
-		*/ 
+ 
 		if (strcmp(B.key, in_key) > 0)
 		{
 			//set laggerNodes new child
@@ -209,8 +200,8 @@ void AVL::Insert(char in_key[])
 		{
 			//set laggerNode's new child
 			B.numRightChild = C.fileIndex;
-			_nodeWriter(&B); //This breaks file 
-			_readFile(); 
+			_nodeWriter(&B); //This breaks file ----------------------------------------------------------------------------------------
+			//_readFile(); 
 		}  
 
 		//correct BFs after the insert 
