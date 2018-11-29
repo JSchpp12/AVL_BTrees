@@ -10,15 +10,15 @@ class AVL
 public:
 	struct AVL_Node
 	{
-		int BF; 
-		int fileIndex;   //where in the file this node is written
-		int counter; 
-		int numLeftChild; 
-		int numRightChild; 
+		int BF = 0; 
+		int fileIndex = 0; //where in the file this node is written
+		int counter = 1; 
+		int numLeftChild = 0; 
+		int numRightChild = 0; 
 		char key[50]; 
 	};
 
-	
+
 
 	std::string storageFile = "storage.txt"; //file to store the nodes in 
 
@@ -33,6 +33,7 @@ public:
 	AVL();
 	~AVL(); 
 	void Insert(char in_key[]); 
+	void Read(); 
 	
 private: 
 	void LL_Rotate(AVL_Node *rotationPoint,AVL_Node *B ,AVL_Node *C); 
