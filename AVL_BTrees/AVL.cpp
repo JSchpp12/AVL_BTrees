@@ -7,6 +7,8 @@
 
 using namespace std; 
 
+static std::fstream file;
+
 AVL::AVL()
 {
 	//FIND NEW WAY OF WRITING A BLANK NODE TO THE FILE
@@ -23,6 +25,16 @@ AVL::AVL()
 	{
 		std::cout << "cannot delete"; 
 	}
+
+	file.open(storageFile, ios::out | ios::in | ios::binary | ios::trunc );
+	//file.close(); 
+	//file.open(storageFile, ios::out | ios::in | ios::binary); 
+	if (!file.is_open())  exit(1); 
+}
+
+AVL::~AVL()
+{
+	file.close(); 
 }
 
 void AVL::Insert(char in_key[])
@@ -549,64 +561,52 @@ int AVL::_getNodeHeight(AVL_Node* focusNode)
 
 void AVL::_nodeReader(int index, AVL_Node* returnedNode)
 {
-	AVL_Node newNode; 
+	AVL_Node newNode;
 	int BF = 111;
-	int fileIndex; 
+	int fileIndex;
 	int counter;
-	int numLeftChild; 
-	int numRightChild; 
+	int numLeftChild;
+	int numRightChild;
 	char key[50];
 
-	std::ifstream myfile; 
-	myfile.open(storageFile, ios::in | ios::binary); 
-	myfile.seekg(0, ios::beg); 
-	std::cout << "beginning read \n"; 
-	if (myfile)
+	//std::ifstream myfile; 
+	//myfile.open(storageFile, ios::in | ios::binary); 
+	file.seekg(0, ios::beg);
+	std::cout << "beginning read \n";
+	for (int j = 0; j < index; j++)
 	{
-		for (int j = 0; j <= index; j++)
-		{
-			myfile.read((char*)returnedNode, sizeof(AVL_Node));
-			std::cout << returnedNode->key << " ....END \n"; 
-		}
-		myfile.close();  
+		file.read((char*)returnedNode, sizeof(AVL_Node));
+		std::cout << returnedNode->key << " ....END \n";
 	}
-	//else exit(1); //failed to open file
 }
+	//else exit(1); //failed to open file
 
 void AVL::_nodeWriter(AVL_Node *targetNode)
 {
-	int size = sizeof(AVL_Node); 
+	int size = sizeof(AVL_Node);
 	int position = ((targetNode->fileIndex - 1) * sizeof(AVL_Node));
-	std::ofstream myfile; 
-	myfile.open(storageFile, ios::binary);
+	//std::ofstream myfile; 
+	//myfile.open(storageFile, ios::binary);
 	//to overwrite a specific node, skip the ones before it by skipping size of the nodes
-	//myfile.seekp(0, ios::beg); 
-	myfile.seekp(position, ios::beg);
-	if (!myfile.eof())
-	{
-		myfile.write((char*)targetNode, sizeof(AVL_Node));
-		//myfile.write((char*)&BF, sizeof(&BF)); 
-		myfile.close();
-	}
-
-	_readFile(); 
+	file.seekp(position, ios::beg);
+	file.write((char*)targetNode, sizeof(AVL_Node));
+	file.flush();
+//_readFile(); 
 }
 
 void AVL::_readFile()
 {
 	AVL_Node newNode; 
 	std::ifstream myfile;
-	myfile.open(storageFile, ios::in | ios::binary);
-	myfile.seekg(0, ios::beg);
+	//myfile.open(storageFile, ios::in | ios::binary);
+	file.seekg(0, ios::beg);
 
 	std::cout << "beginning read WHOLE FILE\n";
 
-		while (!myfile.eof())
+		while (!file.eof())
 		{
 			strcpy(newNode.key, "NULL"); 
-			myfile.read((char*)&newNode, sizeof(AVL_Node));
+			file.read((char*)&newNode, sizeof(AVL_Node));
 			std::cout << newNode.key << "end\n";
 		}
-	myfile.close();
-
 }

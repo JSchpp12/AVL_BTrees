@@ -18,6 +18,8 @@ public:
 		char key[50]; 
 	};
 
+	
+
 	std::string storageFile = "storage.txt"; //file to store the nodes in 
 
 	//use this to store the 3 nodes that are permitted for the memory restriction
@@ -29,6 +31,7 @@ public:
 	AVL_Node *rootNode; 
 
 	AVL();
+	~AVL(); 
 	void Insert(char in_key[]); 
 	
 private: 
