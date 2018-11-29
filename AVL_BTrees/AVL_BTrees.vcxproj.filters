@@ -41,9 +41,6 @@
     <ClCompile Include="B_Tree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="B_Node.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Harry Potter and the Sorcerer.txt" />

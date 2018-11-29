@@ -1,7 +1,9 @@
-#pragma once
-class B_Node
+#pragma once 
+
+struct Bnode
 {
-public:
-	B_Node();
+	static const int t = 2; 
+
+
 };
 

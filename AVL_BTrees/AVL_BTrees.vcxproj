@@ -159,7 +159,6 @@
   <ItemGroup>
     <ClCompile Include="AVL.cpp" />
     <ClCompile Include="AVL_BTrees.cpp" />
-    <ClCompile Include="B_Node.cpp" />
     <ClCompile Include="B_Tree.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

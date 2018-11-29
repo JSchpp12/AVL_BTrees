@@ -1,7 +1,9 @@
 #pragma once
 #include "B_Node.h"
+#include "B_Node.h"
 #include <iostream>
 #include <string.h>
+
 
 class B_Tree
 {
