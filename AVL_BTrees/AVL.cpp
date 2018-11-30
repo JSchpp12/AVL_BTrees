@@ -26,6 +26,8 @@ AVL::AVL()
 	{
 		std::cout << "cannot delete";
 	}
+
+	file.open(storageFile, fstream::in | fstream::out | fstream::trunc);
 	if (file.fail())
 	{
 		std::cout << "Filed to open file \n";
