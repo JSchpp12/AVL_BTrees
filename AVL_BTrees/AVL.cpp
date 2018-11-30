@@ -21,6 +21,7 @@ AVL::AVL()
 	blank.counter = 0;
 	strcpy(blank.key, "NULLNODE");
 	*/
+	file.open(storageFile, ios::in)
 	if (remove("storage.txt") != 0)
 	{
 		std::cout << "cannot delete";
