@@ -11,7 +11,7 @@ fstream file;
 
 AVL::AVL()
 {	
-	file.open(storageFile, fstream::in | fstream::out | fstream::trunc);
+	file.open(storageFile, fstream::in | fstream::out | fstream::trunc | fstream::binary);
 	if (file.fail())
 	{
 		std::cout << "Filed to open file \n";
