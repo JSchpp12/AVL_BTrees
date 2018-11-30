@@ -10,23 +10,7 @@ using namespace std;
 fstream file;
 
 AVL::AVL()
-{
-	//FIND NEW WAY OF WRITING A BLANK NODE TO THE FILE
-	/*
-	AVL_Node blank;
-	blank.BF = 123;
-	blank.fileIndex = 0;
-	blank.numLeftChild = 0;
-	blank.numRightChild = 0;
-	blank.counter = 0;
-	strcpy(blank.key, "NULLNODE");
-	*/
-	file.open(storageFile, ios::in)
-	if (remove("storage.txt") != 0)
-	{
-		std::cout << "cannot delete";
-	}
-
+{	
 	file.open(storageFile, fstream::in | fstream::out | fstream::trunc);
 	if (file.fail())
 	{
@@ -37,10 +21,7 @@ AVL::AVL()
 		std::cout << "could not open file!\n";
 		return;
 	}
-	//file.close(); 
-	//file.open(storageFile, ios::out | ios::in | ios::binary); 
 	if (!file.is_open())  exit(1);
-
 }
 
 AVL::~AVL()
@@ -57,7 +38,6 @@ void AVL::Insert(char in_key[])
 {
 	AVL_Node *leaderNode, *laggerNode, *lastOutOfSpec, *parentOfLastOutSpec;
 	int displacement;
-
 
 	bool leaderNodeExsist = true; //use this to exit insertion loop
 	bool laggerNodeExsist;
