@@ -1,35 +1,59 @@
 #pragma once
-#include "B_Node.h"
-#include "B_Node.h"
 #include <iostream>
 #include <string.h>
+#include <fstream>
+#include <string>
 
+using namespace std; 
 
 class B_Tree
 {
+	
+
+public:
 	struct BNode
 	{
-		static const int t = 2; 
+		static const int t = 2;
 
-		int fileIndex; 
-		char key[2 * t][50]; //keys
-		int child[2*t]; //pointers to children
+		int fileIndex;
+		char key[2 * t - 1][50]; //keys
+		int counter[2 * t - 1]; //counters for each of the number of occurances of each key
+		int child[2 * t]; //pointers to children
 
-		int maxNumKey = 2*t + 1; //max number of keys allowed 
-		bool leaf = false; //is this node a leaf
+		int numKeys = 0; 
+		int numChildren = 0; 
+		int maxNumKeys = 2 * t - 1; //max number of keys allowed --- same as max index in nodes 
+		int maxNumChildren = 2 * t; 
+		bool isleaf = false; //is this node a leaf
 	};
-public:
-	B_Tree();
 
-	int numRootNode = 0; 
-	int writeIndex = 1; 
+	struct SearchReturn
+	{
+		int keyLocation = 0;
+		int nodeLocation = 0;
+		bool foundExact = false; 
+	};
+
+	B_Tree();
 
 	void Insert(char in_key[]);
 
+	int numRootNode = 0;
+	int writeIndex = 1;
+
+	int numDiskReads = 0; //number of disk reads
+	int numDiskWrites = 0; //number of disk writes
+
 private: 
-	void _traverse(char in_key[]); 
-	bool _search(BNode *X, BNode *Y, char in_key[]); 
+	string storageFile = "BTree_Storage.txt"; //storage file for BTree Nodes
+
+	void _traverse(BNode *currentNode); //print in-order traversal 
+	void _search(BNode *Y, char in_key[], SearchReturn *returnedInfo); 
+	int _getHeight(BNode *currentNode, int currentHeight); 
+	void _insertNonFull(char in_key[], BNode *X, BNode *Y, BNode *Z); 
+	void _splitChild(BNode *X,BNode *Y, BNode *Z, int pointer); 
 	void _readFile(int location, BNode *X); 
-	void _writeFile(BNode *X); 
+	void _writeFile(BNode *X);
+	
 };
 

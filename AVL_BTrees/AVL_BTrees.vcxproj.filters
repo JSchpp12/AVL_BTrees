@@ -24,9 +24,6 @@
     <ClInclude Include="B_Tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="B_Node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

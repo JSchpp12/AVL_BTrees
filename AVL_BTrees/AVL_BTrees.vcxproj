@@ -152,7 +152,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AVL.h" />
-    <ClInclude Include="B_Node.h" />
     <ClInclude Include="B_Tree.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
