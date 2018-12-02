@@ -13,20 +13,34 @@ B_Tree::B_Tree()
 	numDiskWrites = 0; 
 }
 
+void B_Tree::GetInfo()
+{
+	std::cout << "B_Tree Information: \n";
+	std::cout << "Number of Words: " << numKeys << "\n";
+	std::cout << "Number of Reads: " << numDiskReads << "\n";
+	std::cout << "Number of Writes: " << numDiskWrites << "\n";
+	std::cout << "Total Number of Nodes: " << writeIndex << "\n";
+	std::cout << "File Size: " << _getFileSize() << "\n";
+	std::cout << "Loading Factor: " << ((writeIndex / numKeys) * 100) << "\n"; 
+}
+
 void B_Tree::Insert(char in_key[])
 {
+	
 	BNode X, Y, Z; 
 	SearchReturn searchResults; 
+
+	numKeys++; 
 
 	if (numRootNode == 0)
 	{
 		//create root node
-		strcpy(X.key[0], in_key); 
+		strcpy(X.key[1], in_key); 
 		X.numKeys = 1; 
-		X.counter[0] = 1; 
+		X.counter[1] = 1; 
 		X.fileIndex = writeIndex; 
 		X.isleaf = true; 
-		for (int i = 0; i < X.maxNumChildren; i++)
+		for (int i = 1; i < X.maxNumChildren; i++)
 		{
 			//set all children pointers to null
 			X.child[i] = 0; 
@@ -51,19 +65,20 @@ void B_Tree::Insert(char in_key[])
 		return; 
 	}
 
+	_readFile(numRootNode, &X); 
 	if (X.numKeys == X.maxNumKeys)
 	{
 		//will need to split the node since it is full
 		//set up new node that will become the node
 		Y.fileIndex = writeIndex;
 		writeIndex++;
-
+		Y.numKeys = 0; 
 		Y.isleaf = false; 
-		Y.child[0] = X.fileIndex; 
+		Y.child[1] = numRootNode; 
 		Y.numChildren++; 
 		numRootNode = Y.fileIndex; 
 
-		_splitChild(&Y, &X, &Z, 0);
+		_splitChild(&Y, &X, &Z, 1);
 		//_splitChild(&X, &Y, &Z, 0); 
 		_insertNonFull(in_key, &Y, &X, &Z); 
 	}
@@ -79,25 +94,27 @@ void B_Tree::Insert(char in_key[])
 void B_Tree::_search(BNode *X, char in_key[], SearchReturn *returnInfo)
 {
 	bool found = false;
-	int i = 0;
-	while ((i < X->maxNumKeys) && (strcmp(in_key, X->key[i]) > 0)) i++;
+	int i = 1;
+	while ((i <= X->numKeys) && (strcmp(in_key, X->key[i]) > 0)) i++;
 
 	//If found key is the same as input, return node
-	if (strcmp(in_key, X->key[i]) == 0)
+	if (i <= X->numKeys)
 	{
-		returnInfo->keyLocation = i; 
-		returnInfo->nodeLocation = X->fileIndex; 
-		returnInfo->foundExact = true; 
-		return;
+		if (strcmp(in_key, X->key[i]) == 0)
+		{
+			returnInfo->keyLocation = i;
+			returnInfo->nodeLocation = X->fileIndex;
+			returnInfo->foundExact = true;
+			return;
+		}
 	}
 
 	if (X->isleaf == true)
 	{
 		returnInfo->keyLocation = 0;
-		returnInfo->nodeLocation = numRootNode; 
+		returnInfo->nodeLocation = 0; 
 		return; 
 	}
-	BNode nextNode; 
 
 	_readFile(X->child[i], X);
 	return _search(X, in_key, returnInfo); 
@@ -109,7 +126,7 @@ int B_Tree::_getHeight(BNode *currentNode, int currentHeight)
 
 	if (currentNode->isleaf) return currentHeight; //at bottom of tree
 
-	for (int i = 0; i < currentNode->numChildren; i++)
+	for (int i = 1; i <= currentNode->numChildren; i++)
 	{
 		_readFile(currentNode->child[i], currentNode); 
 		int childHeight = _getHeight(currentNode, currentHeight + 1); 
@@ -147,11 +164,12 @@ void B_Tree::_traverse(BNode *currentNode)
 void B_Tree::_insertNonFull(char in_key[], BNode *X, BNode *Y, BNode *Z)
 {
 	//pass in targetNode in X
-	int i = X->numKeys - 1;
+	int i = X->numKeys; 
 
 	if (X->isleaf == true)
 	{
-		while (i >= 0 && (strcmp(X->key[i], in_key) > 0))
+		//alter to fit 1 based arrays instead of 0 based
+		while (i >= 1 && (strcmp(X->key[i], in_key) > 0))
 		{
 			strcpy(X->key[i + 1], X->key[i]); 
 			X->counter[i + 1] = X->counter[i]; 
@@ -166,22 +184,24 @@ void B_Tree::_insertNonFull(char in_key[], BNode *X, BNode *Y, BNode *Z)
 	}
 	else
 	{
-		while ((i >= 0) && (strcmp(X->key[i], in_key) > 0))
+		//while ((i >= 1) && (strcmp(X->key[i], in_key) > 0))
+		while ((i >= 1) && (strcmp(in_key, X->key[i]) < 0))
 		{
 			i--; 
 		}
+		i++; //can get too low -- crash 
 
-		_readFile(X->child[i + 1], X); //read in child node
+		_readFile(X->child[i], Y); //read in child node
 		
-		if (Y->numChildren == Y->maxNumChildren)
+		if (Y->numKeys == Y->maxNumKeys)
 		{
 			//need to pass in the correct node, remember - Y is targetnode
-			_splitChild(Y, X, Z, i + 1); 
+			_splitChild(X, Y, Z, i); 
 
 			if (strcmp(in_key, Y->key[i]) > 0) i++; 
-			_readFile(X->child[i], X);
+			_readFile(X->child[i], Y);
 		}
-		_insertNonFull(in_key, X, Y, Z); 
+		_insertNonFull(in_key, Y, X, Z); 
 	}
 }
 
@@ -189,6 +209,7 @@ void B_Tree::_insertNonFull(char in_key[], BNode *X, BNode *Y, BNode *Z)
 void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 { 
 	Y = new BNode; 
+	Z = new BNode; 
 	int maxNumChildren = X->maxNumChildren;
 	int medianIndex = X->t - 1; 
 	int _t = X->t; //save t locallaly for easier use
@@ -200,16 +221,16 @@ void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 	Z->isleaf = Y->isleaf; 
 	Z->numKeys = medianIndex;
 
-	for (int i = 0; i < _t-1  ; i++) //move keys after median into new node 
+	for (int i = 1; i <= _t-1  ; i++) //move keys after median into new node 
 	{
 		strcpy(Z->key[i], Y->key[i + _t]); 
 		Z->counter[i] = Y->counter[i + _t]; 
-		Y->counter[i + _t] = 0; 
+		Y->counter[i + _t] = 1; 
 	}
 
 	if (Y->isleaf == false)
 	{
-		for (int i = 0; i < _t ; i++)
+		for (int i = 1; i <= _t ; i++)
 		{
 			Z->child[i] = Y->child[i + _t]; 
 			Z->numChildren++; 
@@ -228,21 +249,23 @@ void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 	X->numChildren++; 
 
 	//move keys
-	for (int i = X->numKeys; i > pointer ; i --)
+	for (int i = X->numKeys; i >= pointer ; i --)
 	{
 		strcpy(X->key[i + 1], X->key[i]); 
 		X->counter[i + 1] = X->counter[i]; 
 		X->counter[i] = 1; 
 	}
 
-	strcpy(X->key[pointer], Y->key[_t - 1]); 
-	X->counter[pointer] = 1; 
+	strcpy(X->key[pointer], Y->key[_t]); 
+	X->counter[pointer] = Y->counter[_t]; 
 	Y->counter[_t] = 1;
 	X->numKeys++; 
 
 	_writeFile(X); 
 	_writeFile(Y);
 	_writeFile(Z); 
+
+	delete Y, Z; 
 }
 
 void B_Tree::_readFile(int location, BNode * X)
@@ -258,4 +281,10 @@ void B_Tree::_writeFile(BNode * X)
 	Bfile.seekp(position, fstream::beg); 
 	Bfile.write((char*)X, sizeof(BNode)); 
 	numDiskWrites++; //increment number of disk writes 
+}
+
+int B_Tree::_getFileSize()
+{
+	std::ifstream in(storageFile, fstream::ate | fstream::binary); 
+	return in.tellg(); 
 }

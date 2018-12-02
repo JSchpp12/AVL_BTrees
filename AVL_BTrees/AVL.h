@@ -30,18 +30,26 @@ public:
 	int numRootNode;
 	AVL_Node *rootNode;
 
+	int numFileWrites = 0;
+	int numFileReads = 0;
+	int numWords = 0;
+	int numDistinctWords = 0; 
+
 	AVL();
 	~AVL();
 	void Insert(char in_key[]);
 	void Read();
+	void GetInfo(); 
 
 private:
 	void LL_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C);
 	void RR_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C);
 	int _calculateBalanceFactor(AVL_Node *tippingNode);
 	int _getNodeHeight(AVL_Node *focusNode);
+	void _traverse(AVL_Node *in_node); 
 	void _nodeReader(int index, AVL_Node* retrunedNode);
 	void _nodeWriter(AVL_Node *targetNode);
 	void _readFile();
+	int _getFileSize(); 
 };
 

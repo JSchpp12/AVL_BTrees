@@ -16,14 +16,14 @@ public:
 		static const int t = 2;
 
 		int fileIndex;
-		char key[2 * t - 1][50]; //keys
-		int counter[2 * t - 1]; //counters for each of the number of occurances of each key
-		int child[2 * t]; //pointers to children
+		char key[2 * t][50]; //keys
+		int counter[2 * t]; //counters for each of the number of occurances of each key
+		int child[2 * t + 1]; //pointers to children
 
 		int numKeys = 0; 
 		int numChildren = 0; 
 		int maxNumKeys = 2 * t - 1; //max number of keys allowed --- same as max index in nodes 
-		int maxNumChildren = 2 * t; 
+		int maxNumChildren = 2 * t + 1; 
 		bool isleaf = false; //is this node a leaf
 	};
 
@@ -37,12 +37,14 @@ public:
 	B_Tree();
 
 	void Insert(char in_key[]);
+	void GetInfo(); 
 
 	int numRootNode = 0;
 	int writeIndex = 1;
 
 	int numDiskReads = 0; //number of disk reads
 	int numDiskWrites = 0; //number of disk writes
+	int numKeys = 0;
 
 private: 
 	string storageFile = "BTree_Storage.txt"; //storage file for BTree Nodes
@@ -54,6 +56,6 @@ private:
 	void _splitChild(BNode *X,BNode *Y, BNode *Z, int pointer); 
 	void _readFile(int location, BNode *X); 
 	void _writeFile(BNode *X);
-	
+	int _getFileSize();
 };
 

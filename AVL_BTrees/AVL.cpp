@@ -34,6 +34,24 @@ void AVL::Read()
 	_readFile();
 }
 
+void AVL::GetInfo()
+{
+	//traverse for keys
+	AVL_Node root;
+	_nodeReader(numRootNode, &root);
+	_traverse(&root);
+
+	std::cout << "AVL Tree Information: \n";
+	std::cout << "Number of Words: " << numWords << "\n";
+	std::cout << "Number of Distinct Words: " << numDistinctWords << "\n";
+	std::cout << "Number of Reads: " << numFileReads << "\n";
+	std::cout << "Number of Writes: " << numFileWrites << "\n";
+	std::cout << "Total Number of Nodes: " << writeIndex << "\n";
+	std::cout << "File Size: " << _getFileSize() << "\n";
+
+}
+
+
 void AVL::Insert(char in_key[])
 {
 	AVL_Node *leaderNode, *laggerNode, *lastOutOfSpec, *parentOfLastOutSpec;
@@ -48,15 +66,7 @@ void AVL::Insert(char in_key[])
 	//numbers for reading
 	int numParentLastOutSpec, numOfLastOutSpec;
 
-	//convert in_key to lowercase for debugging purposes 
-	if (in_key[0] < 90 && in_key[0] >= 65) in_key[0] = in_key[0] + 32;
-
-	if (strcmp(in_key, "the") == 0)
-	{
-		std::cout << "FOCUS";
-	}
-
-	std::cout << "Inserting " << in_key << "\n";
+	//std::cout << "Inserting " << in_key << "\n";
 
 	//read the rootNode from the file
 	if (numRootNode != 0)
@@ -288,7 +298,6 @@ void AVL::Insert(char in_key[])
 				else
 				{
 					//LR Rotation -- RR Rotation and then a LL rotation
-					std::cout << "LR\n";
 
 					//determine which side of the tree the insertion occured on -- only need A = lastOutOfSpec
 
@@ -360,8 +369,6 @@ void AVL::Insert(char in_key[])
 					if ((numParentLastOutSpec != 0) && (A.fileIndex == B.numLeftChild)) leftChild = true;
 					else leftChild = false;
 
-					std::cout << "RL rotation\n";
-
 					int numLast = A.fileIndex;
 					int numLast_leftChild = A.numLeftChild;
 					int numLast_rightChild = A.numRightChild;
@@ -401,8 +408,6 @@ void AVL::LL_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C)
 	//B will be empty 
 	//C will be parent of rotated tree
 	//A = rotationPoint
-
-	std::cout << "LL Rotate \n";
 	//AVL_Node *storage = rotationPoint->leftChild->rightChild;
 	//AVL_Node *newRoot = rotationPoint->leftChild;
 
@@ -451,7 +456,6 @@ void AVL::LL_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C)
 void AVL::RR_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C)
 {
 	//NEW ROOT LEFTCHILD NOT BEGIN SET
-	std::cout << "RR Rotation\n";
 
 	_nodeReader(rotationPoint->numRightChild, B); //B is now newRoot
 	int numStorage = B->numLeftChild; //save storage
@@ -563,10 +567,39 @@ int AVL::_getNodeHeight(AVL_Node* focusNode)
 	}
 }
 
+void AVL::_traverse(AVL_Node *in_node)
+{
+	if (in_node != nullptr)
+	{
+		numDistinctWords++;
+		numWords = numWords + in_node->counter;
+		int savePoint = in_node->fileIndex;
+		if (in_node->numLeftChild != 0)
+		{
+			_nodeReader(in_node->numLeftChild, in_node);
+			_traverse(in_node);
+			_nodeReader(savePoint, in_node);
+		}
+
+		if (in_node->numRightChild != 0)
+		{
+			_nodeReader(in_node->numRightChild, in_node);
+			_traverse(in_node);
+		}
+
+	}
+	else
+	{
+		return;
+	}
+
+}
+
+
 void AVL::_nodeReader(int index, AVL_Node* returnedNode)
 {
 	AVL_Node newNode;
-
+	numFileReads++; 
 	//std::ifstream myfile; 
 	//myfile.open(storageFile, ios::in | ios::binary); 
 	int position((index - 1) * sizeof(AVL_Node));
@@ -579,6 +612,7 @@ void AVL::_nodeReader(int index, AVL_Node* returnedNode)
 
 void AVL::_nodeWriter(AVL_Node *targetNode)
 {
+	numFileWrites++; 
 	int size = sizeof(AVL_Node);
 	int position = ((targetNode->fileIndex - 1) * sizeof(AVL_Node));
 	//std::ofstream myfile; 
@@ -609,4 +643,10 @@ void AVL::_readFile()
 		std::cout << "BF : " << newNode.BF << "\n";
 	}
 	file.clear();
+}
+
+int AVL::_getFileSize()
+{
+	std::ifstream in(storageFile, fstream::ate | fstream::binary); 
+	return in.tellg(); 
 }
