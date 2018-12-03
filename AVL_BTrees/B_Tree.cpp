@@ -185,7 +185,6 @@ void B_Tree::_insertNonFull(char in_key[], BNode *X, BNode *Y, BNode *Z)
 	}
 	else
 	{
-		//while ((i >= 1) && (strcmp(X->key[i], in_key) > 0))
 		while ((i >= 1) && (strcmp(in_key, X->key[i]) < 0))
 		{
 			i--; 
@@ -206,7 +205,7 @@ void B_Tree::_insertNonFull(char in_key[], BNode *X, BNode *Y, BNode *Z)
 	}
 }
 
-//Y is full node to be split -- X will be root (Y will be cleared)
+//Y is full node to be split -- X will be parent (Y will be cleared)
 void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 { 
 	//Y = new BNode; 
@@ -221,6 +220,7 @@ void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 	Z->numKeys = 0;
 	Z->numChildren = 0; 
 
+	//read in child that will be split 
 	_readFile(X->child[pointer], Y); 
 	Z->isleaf = Y->isleaf; 
 	Z->numKeys = medianIndex;
@@ -232,6 +232,7 @@ void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 		Y->counter[i + _t] = 1; 
 	}
 
+	//if Y has children, need to move those pointers over to new node as well
 	if (Y->isleaf == false)
 	{
 		for (int i = 1; i <= _t ; i++)
@@ -252,7 +253,7 @@ void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 	X->child[pointer + 1] = Z->fileIndex; 
 	X->numChildren++; 
 
-	//move keys
+	//move to make room for median key from child node that is being split
 	for (int i = X->numKeys; i >= pointer ; i --)
 	{
 		strcpy(X->key[i + 1], X->key[i]); 
@@ -260,6 +261,7 @@ void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 		X->counter[i] = 1; 
 	}
 
+	//copy over median key
 	strcpy(X->key[pointer], Y->key[_t]); 
 	X->counter[pointer] = Y->counter[_t]; 
 	Y->counter[_t] = 1;
@@ -268,8 +270,6 @@ void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 	_writeFile(X); 
 	_writeFile(Y);
 	_writeFile(Z); 
-
-	//delete Y, Z; 
 }
 
 void B_Tree::_readFile(int location, BNode * X)
