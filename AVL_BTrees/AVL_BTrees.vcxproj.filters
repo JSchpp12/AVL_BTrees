@@ -40,7 +40,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Harry Potter and the Sorcerer.txt" />
     <Text Include="storage.txt" />
   </ItemGroup>
 </Project>

@@ -167,7 +167,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Harry Potter and the Sorcerer.txt" />
     <Text Include="storage.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
