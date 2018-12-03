@@ -82,10 +82,7 @@ void AVL::Insert(char in_key[])
 	//if (rootNode == nullptr)
 	if (writeIndex == 0)
 	{
-		//AVL_Node* newNode = new AVL_Node();
 		std::strcpy(C.key, in_key);
-		//newNode->leftChild = nullptr;
-		//newNode->rightChild = nullptr;
 		C.numRightChild = 0;
 		C.numLeftChild = 0;
 		C.fileIndex = 1;

@@ -13,7 +13,8 @@ class B_Tree
 public:
 	struct BNode
 	{
-		static const int t = 2;
+		//alter this value to change the t - value of the b tree
+		static const int t = 100;
 
 		int fileIndex;
 		char key[2 * t][50]; //keys

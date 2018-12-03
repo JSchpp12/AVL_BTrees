@@ -15,13 +15,14 @@ B_Tree::B_Tree()
 
 void B_Tree::GetInfo()
 {
+	double value = ((writeIndex / numKeys) * 100); 
 	std::cout << "B_Tree Information: \n";
 	std::cout << "Number of Words: " << numKeys << "\n";
 	std::cout << "Number of Reads: " << numDiskReads << "\n";
 	std::cout << "Number of Writes: " << numDiskWrites << "\n";
 	std::cout << "Total Number of Nodes: " << writeIndex << "\n";
 	std::cout << "File Size: " << _getFileSize() << "\n";
-	std::cout << "Loading Factor: " << ((writeIndex / numKeys) * 100) << "\n"; 
+	std::cout << "Loading Factor: " << value << "\n"; 
 }
 
 void B_Tree::Insert(char in_key[])
@@ -208,14 +209,17 @@ void B_Tree::_insertNonFull(char in_key[], BNode *X, BNode *Y, BNode *Z)
 //Y is full node to be split -- X will be root (Y will be cleared)
 void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 { 
-	Y = new BNode; 
-	Z = new BNode; 
+	//Y = new BNode; 
+	//Z = new BNode; 
 	int maxNumChildren = X->maxNumChildren;
 	int medianIndex = X->t - 1; 
 	int _t = X->t; //save t locallaly for easier use
 
+	//make Z a new node
 	Z->fileIndex = writeIndex; 
 	writeIndex++; 
+	Z->numKeys = 0;
+	Z->numChildren = 0; 
 
 	_readFile(X->child[pointer], Y); 
 	Z->isleaf = Y->isleaf; 
@@ -265,7 +269,7 @@ void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 	_writeFile(Y);
 	_writeFile(Z); 
 
-	delete Y, Z; 
+	//delete Y, Z; 
 }
 
 void B_Tree::_readFile(int location, BNode * X)
