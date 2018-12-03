@@ -18,8 +18,6 @@ public:
 		char key[50];
 	};
 
-
-
 	std::string storageFile = "storage.txt"; //file to store the nodes in 
 
 	//use this to store the 3 nodes that are permitted for the memory restriction
@@ -34,6 +32,15 @@ public:
 	~AVL();
 	void Insert(char in_key[]);
 	void Read();
+	void GetInfo();
+
+	//variables for testing 
+	int numFileReads = 0; 
+	int numFileWrites = 0;
+	int numWords = 0; 
+	int numNodes = 0; 
+	int numDistinctWords = 0; 
+
 
 private:
 	void LL_Rotate(AVL_Node *rotationPoint, AVL_Node *B, AVL_Node *C);
@@ -41,7 +48,9 @@ private:
 	int _calculateBalanceFactor(AVL_Node *tippingNode);
 	int _getNodeHeight(AVL_Node *focusNode);
 	void _nodeReader(int index, AVL_Node* retrunedNode);
+	void _traverse(AVL_Node *in_node); 
 	void _nodeWriter(AVL_Node *targetNode);
 	void _readFile();
+	int _getFileSize();
 };
 

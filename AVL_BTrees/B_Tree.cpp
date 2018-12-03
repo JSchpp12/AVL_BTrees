@@ -13,42 +13,57 @@ B_Tree::B_Tree()
 	numDiskWrites = 0; 
 }
 
+void B_Tree::GetInfo()
+{
+	//BNode test; 
+	//_readFile(numRootNode, &test);
+	//_traverse(&test); 
+
+	std::cout << "B_Tree Information: \n"; 
+	std::cout << "Number of Words: " << numKeys << "\n"; 
+	std::cout << "Number of Reads: " << numDiskReads << "\n"; 
+	std::cout << "Number of Writes: " << numDiskWrites << "\n"; 
+	std::cout << "Total Number of Nodes: " << writeIndex	 << "\n"; 
+	std::cout << "File Size: " << _getFileSize() << "\n"; 
+}
+
 void B_Tree::Insert(char in_key[])
 {
-	BNode X, Y, Z; 
-	SearchReturn searchResults; 
+	BNode X, Y, Z;
+	SearchReturn searchResults;
 
+	//std::cout << in_key << "\n"; 
 	if (numRootNode == 0)
 	{
 		//create root node
-		strcpy(X.key[0], in_key); 
-		X.numKeys = 1; 
-		X.counter[0] = 1; 
-		X.fileIndex = writeIndex; 
-		X.isleaf = true; 
+		strcpy(X.key[0], in_key);
+		X.numKeys = 1;
+		X.counter[0] = 1;
+		X.fileIndex = writeIndex;
+		X.isleaf = true;
 		for (int i = 0; i < X.maxNumChildren; i++)
 		{
 			//set all children pointers to null
-			X.child[i] = 0; 
+			X.child[i] = 0;
 		}
-		_writeFile(&X); 
+		_writeFile(&X);
 
-		numRootNode = X.fileIndex; 
-		writeIndex++; 
-		return; 
+		numRootNode = X.fileIndex;
+		writeIndex++;
+		return;
 	}
 
 	//read in root node 
-	_readFile(numRootNode, &X); 
+	_readFile(numRootNode, &X);
 
 	_search(&X, in_key, &searchResults); //search for key
 
 	if (searchResults.foundExact == true)
 	{
 		//found duplicate -- increment counter
-		X.counter[searchResults.keyLocation]++; 
-		_writeFile(&X); 
-		return; 
+		X.counter[searchResults.keyLocation]++;
+		_writeFile(&X);
+		return;
 	}
 
 	if (X.numKeys == X.maxNumKeys)
@@ -58,18 +73,18 @@ void B_Tree::Insert(char in_key[])
 		Y.fileIndex = writeIndex;
 		writeIndex++;
 
-		Y.isleaf = false; 
-		Y.child[0] = X.fileIndex; 
-		Y.numChildren++; 
-		numRootNode = Y.fileIndex; 
+		Y.isleaf = false;
+		Y.child[0] = X.fileIndex;
+		Y.numChildren++;
+		numRootNode = Y.fileIndex;
 
 		_splitChild(&Y, &X, &Z, 0);
 		//_splitChild(&X, &Y, &Z, 0); 
-		_insertNonFull(in_key, &Y, &X, &Z); 
+		_insertNonFull(in_key, &Y, &X, &Z);
 	}
 	else
 	{
-		_insertNonFull(in_key, &X, &Y, &Z); 
+		_insertNonFull(in_key, &X, &Y, &Z);
 	}
 }
 
@@ -97,7 +112,6 @@ void B_Tree::_search(BNode *X, char in_key[], SearchReturn *returnInfo)
 		returnInfo->nodeLocation = numRootNode; 
 		return; 
 	}
-	BNode nextNode; 
 
 	_readFile(X->child[i], X);
 	return _search(X, in_key, returnInfo); 
@@ -126,6 +140,7 @@ void B_Tree::_traverse(BNode *currentNode)
 		std::cout << "Tree is empty \n"; //tree is empty
 		return; 
 	}
+	numNodes++;
 	if (currentNode->numKeys != 0)
 	{
 		for (int i = 0; i <= currentNode->numKeys; i++)
@@ -139,7 +154,7 @@ void B_Tree::_traverse(BNode *currentNode)
 				_traverse(currentNode); 
 				_readFile(saveCurrent, currentNode); //read in previous node
 			}
-			std::cout << currentNode->key[i]; 
+			//std::cout << currentNode->key[i]; 
 		}
 	}
 }
@@ -147,73 +162,74 @@ void B_Tree::_traverse(BNode *currentNode)
 void B_Tree::_insertNonFull(char in_key[], BNode *X, BNode *Y, BNode *Z)
 {
 	//pass in targetNode in X
+//pass in targetNode in X
 	int i = X->numKeys - 1;
 
 	if (X->isleaf == true)
 	{
 		while (i >= 0 && (strcmp(X->key[i], in_key) > 0))
 		{
-			strcpy(X->key[i + 1], X->key[i]); 
-			X->counter[i + 1] = X->counter[i]; 
-			X->counter[i] = 1; 
-			i--; 
+			strcpy(X->key[i + 1], X->key[i]);
+			X->counter[i + 1] = X->counter[i];
+			X->counter[i] = 1;
+			i--;
 		}
-		strcpy(X->key[i + 1], in_key); 
-		X->counter[i + 1] = 1; 
-		X->numKeys++; 
+		strcpy(X->key[i + 1], in_key);
+		X->counter[i + 1] = 1;
+		X->numKeys++;
 
-		_writeFile(X); 
+		_writeFile(X);
 	}
 	else
 	{
 		while ((i >= 0) && (strcmp(X->key[i], in_key) > 0))
 		{
-			i--; 
+			i--;
 		}
 
 		_readFile(X->child[i + 1], X); //read in child node
-		
+
 		if (Y->numChildren == Y->maxNumChildren)
 		{
 			//need to pass in the correct node, remember - Y is targetnode
-			_splitChild(Y, X, Z, i + 1); 
+			_splitChild(Y, X, Z, i + 1);
 
-			if (strcmp(in_key, Y->key[i]) > 0) i++; 
+			if (strcmp(in_key, Y->key[i]) > 0) i++;
 			_readFile(X->child[i], X);
 		}
-		_insertNonFull(in_key, X, Y, Z); 
+		_insertNonFull(in_key, X, Y, Z);
 	}
 }
 
 //Y is full node to be split -- X will be root (Y will be cleared)
 void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 { 
-	Y = new BNode; 
+	Y = new BNode;
 	int maxNumChildren = X->maxNumChildren;
-	int medianIndex = X->t - 1; 
+	int medianIndex = X->t - 1;
 	int _t = X->t; //save t locallaly for easier use
 
-	Z->fileIndex = writeIndex; 
-	writeIndex++; 
+	Z->fileIndex = writeIndex;
+	writeIndex++;
 
-	_readFile(X->child[pointer], Y); 
-	Z->isleaf = Y->isleaf; 
+	_readFile(X->child[pointer], Y);
+	Z->isleaf = Y->isleaf;
 	Z->numKeys = medianIndex;
 
-	for (int i = 0; i < _t-1  ; i++) //move keys after median into new node 
+	for (int i = 0; i < _t - 1; i++) //move keys after median into new node 
 	{
-		strcpy(Z->key[i], Y->key[i + _t]); 
-		Z->counter[i] = Y->counter[i + _t]; 
-		Y->counter[i + _t] = 0; 
+		strcpy(Z->key[i], Y->key[i + _t]);
+		Z->counter[i] = Y->counter[i + _t];
+		Y->counter[i + _t] = 0;
 	}
 
 	if (Y->isleaf == false)
 	{
-		for (int i = 0; i < _t ; i++)
+		for (int i = 0; i < _t; i++)
 		{
-			Z->child[i] = Y->child[i + _t]; 
-			Z->numChildren++; 
-			Y->numChildren--; 
+			Z->child[i] = Y->child[i + _t];
+			Z->numChildren++;
+			Y->numChildren--;
 		}
 	}
 
@@ -222,27 +238,27 @@ void B_Tree::_splitChild(BNode *X, BNode *Y, BNode *Z, int pointer)
 	//add the new node as a child of X
 	for (int i = X->numKeys + 1; i >= pointer + 1; i--)
 	{
-		X->child[i + 1] = X->child[i]; 
+		X->child[i + 1] = X->child[i];
 	}
-	X->child[pointer + 1] = Z->fileIndex; 
-	X->numChildren++; 
+	X->child[pointer + 1] = Z->fileIndex;
+	X->numChildren++;
 
 	//move keys
-	for (int i = X->numKeys; i > pointer ; i --)
+	for (int i = X->numKeys; i > pointer; i--)
 	{
-		strcpy(X->key[i + 1], X->key[i]); 
-		X->counter[i + 1] = X->counter[i]; 
-		X->counter[i] = 1; 
+		strcpy(X->key[i + 1], X->key[i]);
+		X->counter[i + 1] = X->counter[i];
+		X->counter[i] = 1;
 	}
 
-	strcpy(X->key[pointer], Y->key[_t - 1]); 
-	X->counter[pointer] = 1; 
+	strcpy(X->key[pointer], Y->key[_t - 1]);
+	X->counter[pointer] = 1;
 	Y->counter[_t] = 1;
-	X->numKeys++; 
+	X->numKeys++;
 
-	_writeFile(X); 
+	_writeFile(X);
 	_writeFile(Y);
-	_writeFile(Z); 
+	_writeFile(Z);
 }
 
 void B_Tree::_readFile(int location, BNode * X)
@@ -258,4 +274,10 @@ void B_Tree::_writeFile(BNode * X)
 	Bfile.seekp(position, fstream::beg); 
 	Bfile.write((char*)X, sizeof(BNode)); 
 	numDiskWrites++; //increment number of disk writes 
+}
+
+int B_Tree::_getFileSize()
+{
+	std::ifstream in(storageFile, fstream::ate | ifstream::binary); 
+	return in.tellg(); 
 }

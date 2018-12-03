@@ -38,11 +38,16 @@ public:
 
 	void Insert(char in_key[]);
 
+	void GetInfo();
+
 	int numRootNode = 0;
 	int writeIndex = 1;
 
 	int numDiskReads = 0; //number of disk reads
 	int numDiskWrites = 0; //number of disk writes
+	int numKeys = 0; 
+	int numNodes = 0; 
+
 
 private: 
 	string storageFile = "BTree_Storage.txt"; //storage file for BTree Nodes
@@ -54,6 +59,6 @@ private:
 	void _splitChild(BNode *X,BNode *Y, BNode *Z, int pointer); 
 	void _readFile(int location, BNode *X); 
 	void _writeFile(BNode *X);
-	
+	int _getFileSize();
 };
 
