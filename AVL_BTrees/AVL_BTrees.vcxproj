@@ -167,6 +167,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Shakespeare.txt" />
     <Text Include="storage.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
